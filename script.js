@@ -40,4 +40,28 @@
 
   const year = document.getElementById('year');
   if (year) year.textContent = new Date().getFullYear();
+
+  const menuToggle = document.querySelector('.mobile-menu-toggle');
+  const mobileNav = document.getElementById('mobileNavigation');
+  if (menuToggle && mobileNav) {
+    const closeMenu = () => {
+      mobileNav.classList.remove('is-open');
+      menuToggle.setAttribute('aria-expanded', 'false');
+      menuToggle.setAttribute('aria-label', 'Open navigation menu');
+      menuToggle.textContent = '☰';
+    };
+
+    menuToggle.addEventListener('click', () => {
+      const willOpen = menuToggle.getAttribute('aria-expanded') !== 'true';
+      mobileNav.classList.toggle('is-open', willOpen);
+      menuToggle.setAttribute('aria-expanded', String(willOpen));
+      menuToggle.setAttribute('aria-label', willOpen ? 'Close navigation menu' : 'Open navigation menu');
+      menuToggle.textContent = willOpen ? '×' : '☰';
+    });
+
+    mobileNav.querySelectorAll('a').forEach((link) => link.addEventListener('click', closeMenu));
+    document.addEventListener('keydown', (event) => {
+      if (event.key === 'Escape') closeMenu();
+    });
+  }
 })();
