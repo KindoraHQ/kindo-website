@@ -76,13 +76,19 @@
       slideWrap.classList.toggle('is-switching', animate);
       slideWrap.innerHTML = [0,1,2].map((offset) => {
         const n = slides[(start + offset) % slides.length];
-        return `<img src="nft-collection/images/kindo-${n}.png" alt="Featured KINDO moment ${n}" loading="lazy">`;
+        return `<img src="nft-collection/images/kindo-${n}.png" data-nft-offset="${offset}" alt="Featured KINDO moment ${n}" loading="lazy">`;
       }).join('');
       status.textContent = `${String(start + 1).padStart(2, '0')} / ${String(slides.length).padStart(2, '0')}`;
     };
     const move = (step) => { start = (start + step + slides.length) % slides.length; render(); };
     carousel.querySelector('[data-nft-prev]').addEventListener('click', () => move(-1));
     carousel.querySelector('[data-nft-next]').addEventListener('click', () => move(1));
+    slideWrap.addEventListener('click', (event) => {
+      const image = event.target.closest('img[data-nft-offset]');
+      if (!image) return;
+      const offset = Number(image.dataset.nftOffset);
+      if (offset !== 1) move(offset - 1);
+    });
     let touchX = 0;
     carousel.addEventListener('touchstart', (e) => { touchX = e.changedTouches[0].clientX; clearInterval(timer); }, {passive:true});
     carousel.addEventListener('touchend', (e) => { const delta = e.changedTouches[0].clientX - touchX; if (Math.abs(delta) > 45) move(delta < 0 ? 1 : -1); startTimer(); }, {passive:true});
