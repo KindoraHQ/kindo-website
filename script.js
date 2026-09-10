@@ -90,8 +90,10 @@
       if (offset !== 1) move(offset - 1);
     });
     let touchX = 0;
+    let touchTarget = null;
     carousel.addEventListener('touchstart', (e) => { touchX = e.changedTouches[0].clientX; clearInterval(timer); }, {passive:true});
-    carousel.addEventListener('touchend', (e) => { const delta = e.changedTouches[0].clientX - touchX; if (Math.abs(delta) > 45) move(delta < 0 ? 1 : -1); startTimer(); }, {passive:true});
+    carousel.addEventListener('touchstart', (e) => { touchTarget = e.target.closest('img[data-nft-offset]'); }, {passive:true});
+    carousel.addEventListener('touchend', (e) => { const delta = e.changedTouches[0].clientX - touchX; if (Math.abs(delta) > 45) move(delta < 0 ? 1 : -1); else if (touchTarget) { const offset = Number(touchTarget.dataset.nftOffset); if (offset !== 1) move(offset - 1); } touchTarget = null; startTimer(); }, {passive:true});
     const startTimer = () => { clearInterval(timer); timer = setInterval(() => move(1), 6500); };
     carousel.addEventListener('mouseenter', () => clearInterval(timer));
     carousel.addEventListener('mouseleave', startTimer);
