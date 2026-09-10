@@ -64,4 +64,31 @@
       if (event.key === 'Escape') closeMenu();
     });
   }
+
+  const carousel = document.querySelector('[data-nft-carousel]');
+  if (carousel) {
+    const slides = [120,125,130,135,140,145,150,156];
+    const slideWrap = carousel.querySelector('.nft-slides');
+    const status = carousel.querySelector('[data-nft-status]');
+    let start = 0;
+    let timer;
+    const render = (animate = true) => {
+      slideWrap.classList.toggle('is-switching', animate);
+      slideWrap.innerHTML = [0,1,2].map((offset) => {
+        const n = slides[(start + offset) % slides.length];
+        return `<img src="nft-collection/images/kindo-${n}.png" alt="Featured KINDO moment ${n}" loading="lazy">`;
+      }).join('');
+      status.textContent = `${String(start + 1).padStart(2, '0')} / ${String(slides.length).padStart(2, '0')}`;
+    };
+    const move = (step) => { start = (start + step + slides.length) % slides.length; render(); };
+    carousel.querySelector('[data-nft-prev]').addEventListener('click', () => move(-1));
+    carousel.querySelector('[data-nft-next]').addEventListener('click', () => move(1));
+    let touchX = 0;
+    carousel.addEventListener('touchstart', (e) => { touchX = e.changedTouches[0].clientX; clearInterval(timer); }, {passive:true});
+    carousel.addEventListener('touchend', (e) => { const delta = e.changedTouches[0].clientX - touchX; if (Math.abs(delta) > 45) move(delta < 0 ? 1 : -1); startTimer(); }, {passive:true});
+    const startTimer = () => { clearInterval(timer); timer = setInterval(() => move(1), 6500); };
+    carousel.addEventListener('mouseenter', () => clearInterval(timer));
+    carousel.addEventListener('mouseleave', startTimer);
+    render(false); startTimer();
+  }
 })();
