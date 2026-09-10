@@ -67,7 +67,7 @@
 
   const carousel = document.querySelector('[data-nft-carousel]');
   if (carousel) {
-    const slides = [120,125,130,135,140,145,150,156];
+    const slides = [120,125,128,130,133,134];
     const slideWrap = carousel.querySelector('.nft-slides');
     const status = carousel.querySelector('[data-nft-status]');
     let start = 0;
