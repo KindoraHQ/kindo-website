@@ -98,23 +98,28 @@
       if (offset !== 1) setActiveIndex(activeIndex + offset - 1);
     });
     let touchX = 0;
-    let touchTargetOffset = null;
+    let touchStartY = 0;
     carousel.addEventListener('touchstart', (e) => {
       const touch = e.changedTouches[0];
       touchX = touch.clientX;
-      const hit = document.elementFromPoint(touch.clientX, touch.clientY)?.closest('img[data-nft-offset]');
-      touchTargetOffset = hit && slideWrap.contains(hit) ? Number(hit.dataset.nftOffset) : null;
+      touchStartY = touch.clientY;
       clearInterval(timer);
     }, {passive:true});
     carousel.addEventListener('touchend', (e) => {
       const delta = e.changedTouches[0].clientX - touchX;
       if (Math.abs(delta) > 45) {
         move(delta < 0 ? 1 : -1);
-      } else if (touchTargetOffset !== null && touchTargetOffset !== 1) {
-        // Offset 0 is previous, offset 1 is active, offset 2 is next.
-        setActiveIndex(activeIndex + touchTargetOffset - 1);
+      } else if (Math.abs(e.changedTouches[0].clientY - touchStartY) < 45) {
+        const bounds = carousel.getBoundingClientRect();
+        const relativeX = e.changedTouches[0].clientX - bounds.left;
+        const center = bounds.width / 2;
+        const deadZone = Math.min(bounds.width * 0.14, 56);
+        if (relativeX < center - deadZone) {
+          setActiveIndex(activeIndex - 1);
+        } else if (relativeX > center + deadZone) {
+          setActiveIndex(activeIndex + 1);
+        }
       }
-      touchTargetOffset = null;
       startTimer();
     }, {passive:true});
     const startTimer = () => { clearInterval(timer); timer = setInterval(() => move(1), 6500); };
