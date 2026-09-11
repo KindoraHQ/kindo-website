@@ -130,6 +130,8 @@
 
   const medallion = document.querySelector('[data-medallion-prototype]');
   if (medallion) {
+    const sidewall = medallion.querySelector('[data-medallion-sidewall]');
+    sidewall.innerHTML = Array.from({ length: 48 }, () => '<i></i>').join('');
     const images = [120,125,128,130,133,134,152,153,154,155,156];
     const image = medallion.querySelector('[data-medallion-image]');
     const status = medallion.querySelector('[data-medallion-status]');
