@@ -70,30 +70,53 @@
     const slides = [120,125,128,130,133,134,152,153,154,155,156];
     const slideWrap = carousel.querySelector('.nft-slides');
     const status = carousel.querySelector('[data-nft-status]');
-    let start = 0;
+    // activeIndex is the NFT shown in the center. The DOM order is always
+    // previous / active / next, so a tap maps directly to a new active index.
+    let activeIndex = 1;
     let timer;
     const render = (animate = true) => {
       slideWrap.classList.toggle('is-switching', animate);
-      slideWrap.innerHTML = [0,1,2].map((offset) => {
-        const n = slides[(start + offset) % slides.length];
-        return `<img src="nft-collection/images/kindo-${n}.png" data-nft-offset="${offset}" alt="Featured KINDO moment ${n}" loading="lazy">`;
+      const positions = [-1, 0, 1];
+      slideWrap.innerHTML = positions.map((relativePosition) => {
+        const offset = relativePosition + 1;
+        const n = slides[(activeIndex + relativePosition + slides.length) % slides.length];
+        return `<img src="nft-collection/images/kindo-${n}.png" data-nft-offset="${offset}" class="${offset === 1 ? 'is-active' : ''}" aria-current="${offset === 1 ? 'true' : 'false'}" alt="Featured KINDO moment ${n}" loading="lazy">`;
       }).join('');
-      status.textContent = `${String(start + 1).padStart(2, '0')} / ${String(slides.length).padStart(2, '0')}`;
+      status.textContent = `${String(activeIndex + 1).padStart(2, '0')} / ${String(slides.length).padStart(2, '0')}`;
     };
-    const move = (step) => { start = (start + step + slides.length) % slides.length; render(); };
+    const setActiveIndex = (index) => {
+      activeIndex = (index + slides.length) % slides.length;
+      render();
+    };
+    const move = (step) => setActiveIndex(activeIndex + step);
     carousel.querySelector('[data-nft-prev]').addEventListener('click', () => move(-1));
     carousel.querySelector('[data-nft-next]').addEventListener('click', () => move(1));
     slideWrap.addEventListener('click', (event) => {
       const image = event.target.closest('img[data-nft-offset]');
       if (!image) return;
       const offset = Number(image.dataset.nftOffset);
-      if (offset !== 1) move(offset - 1);
+      if (offset !== 1) setActiveIndex(activeIndex + offset - 1);
     });
     let touchX = 0;
-    let touchTarget = null;
-    carousel.addEventListener('touchstart', (e) => { touchX = e.changedTouches[0].clientX; clearInterval(timer); }, {passive:true});
-    carousel.addEventListener('touchstart', (e) => { touchTarget = e.target.closest('img[data-nft-offset]'); }, {passive:true});
-    carousel.addEventListener('touchend', (e) => { const delta = e.changedTouches[0].clientX - touchX; if (Math.abs(delta) > 45) move(delta < 0 ? 1 : -1); else if (touchTarget) { const offset = Number(touchTarget.dataset.nftOffset); if (offset !== 1) move(offset - 1); } touchTarget = null; startTimer(); }, {passive:true});
+    let touchTargetOffset = null;
+    carousel.addEventListener('touchstart', (e) => {
+      const touch = e.changedTouches[0];
+      touchX = touch.clientX;
+      const hit = document.elementFromPoint(touch.clientX, touch.clientY)?.closest('img[data-nft-offset]');
+      touchTargetOffset = hit && slideWrap.contains(hit) ? Number(hit.dataset.nftOffset) : null;
+      clearInterval(timer);
+    }, {passive:true});
+    carousel.addEventListener('touchend', (e) => {
+      const delta = e.changedTouches[0].clientX - touchX;
+      if (Math.abs(delta) > 45) {
+        move(delta < 0 ? 1 : -1);
+      } else if (touchTargetOffset !== null && touchTargetOffset !== 1) {
+        // Offset 0 is previous, offset 1 is active, offset 2 is next.
+        setActiveIndex(activeIndex + touchTargetOffset - 1);
+      }
+      touchTargetOffset = null;
+      startTimer();
+    }, {passive:true});
     const startTimer = () => { clearInterval(timer); timer = setInterval(() => move(1), 6500); };
     carousel.addEventListener('mouseenter', () => clearInterval(timer));
     carousel.addEventListener('mouseleave', startTimer);
