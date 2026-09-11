@@ -127,4 +127,23 @@
     carousel.addEventListener('mouseleave', startTimer);
     render(false); startTimer();
   }
+
+  const medallion = document.querySelector('[data-medallion-prototype]');
+  if (medallion) {
+    const images = [120,125,128,130,133,134,152,153,154,155,156];
+    const image = medallion.querySelector('[data-medallion-image]');
+    const status = medallion.querySelector('[data-medallion-status]');
+    let index = 0;
+    const cycleMs = 14000;
+    const showNext = () => {
+      image.style.opacity = '0';
+      window.setTimeout(() => {
+        index = (index + 1) % images.length;
+        image.src = `nft-collection/images/kindo-${images[index]}.png`;
+        status.textContent = `${String(index + 1).padStart(2, '0')} / ${String(images.length).padStart(2, '0')}`;
+        image.style.opacity = '1';
+      }, 650);
+    };
+    window.setInterval(showNext, cycleMs);
+  }
 })();
