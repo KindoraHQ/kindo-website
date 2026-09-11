@@ -70,82 +70,33 @@
     const slides = [120,125,128,130,133,134,152,153,154,155,156];
     const slideWrap = carousel.querySelector('.nft-slides');
     const status = carousel.querySelector('[data-nft-status]');
-    // activeIndex is the NFT shown in the center. The DOM order is always
-    // previous / active / next, so a tap maps directly to a new active index.
-    let activeIndex = 1;
+    let start = 0;
     let timer;
     const render = (animate = true) => {
       slideWrap.classList.toggle('is-switching', animate);
-      const positions = [-1, 0, 1];
-      slideWrap.innerHTML = positions.map((relativePosition) => {
-        const offset = relativePosition + 1;
-        const n = slides[(activeIndex + relativePosition + slides.length) % slides.length];
-        return `<img src="nft-collection/images/kindo-${n}.png" data-nft-offset="${offset}" class="${offset === 1 ? 'is-active' : ''}" aria-current="${offset === 1 ? 'true' : 'false'}" alt="Featured KINDO moment ${n}" loading="lazy">`;
+      slideWrap.innerHTML = [0,1,2].map((offset) => {
+        const n = slides[(start + offset) % slides.length];
+        return `<img src="nft-collection/images/kindo-${n}.png" data-nft-offset="${offset}" alt="Featured KINDO moment ${n}" loading="lazy">`;
       }).join('');
-      status.textContent = `${String(activeIndex + 1).padStart(2, '0')} / ${String(slides.length).padStart(2, '0')}`;
+      status.textContent = `${String(start + 1).padStart(2, '0')} / ${String(slides.length).padStart(2, '0')}`;
     };
-    const setActiveIndex = (index) => {
-      activeIndex = (index + slides.length) % slides.length;
-      render();
-    };
-    const move = (step) => setActiveIndex(activeIndex + step);
+    const move = (step) => { start = (start + step + slides.length) % slides.length; render(); };
     carousel.querySelector('[data-nft-prev]').addEventListener('click', () => move(-1));
     carousel.querySelector('[data-nft-next]').addEventListener('click', () => move(1));
     slideWrap.addEventListener('click', (event) => {
       const image = event.target.closest('img[data-nft-offset]');
       if (!image) return;
       const offset = Number(image.dataset.nftOffset);
-      if (offset !== 1) setActiveIndex(activeIndex + offset - 1);
+      if (offset !== 1) move(offset - 1);
     });
     let touchX = 0;
-    let touchStartY = 0;
-    carousel.addEventListener('touchstart', (e) => {
-      const touch = e.changedTouches[0];
-      touchX = touch.clientX;
-      touchStartY = touch.clientY;
-      clearInterval(timer);
-    }, {passive:true});
-    carousel.addEventListener('touchend', (e) => {
-      const delta = e.changedTouches[0].clientX - touchX;
-      if (Math.abs(delta) > 45) {
-        move(delta < 0 ? 1 : -1);
-      } else if (Math.abs(e.changedTouches[0].clientY - touchStartY) < 45) {
-        const bounds = carousel.getBoundingClientRect();
-        const relativeX = e.changedTouches[0].clientX - bounds.left;
-        const center = bounds.width / 2;
-        const deadZone = Math.min(bounds.width * 0.14, 56);
-        if (relativeX < center - deadZone) {
-          setActiveIndex(activeIndex - 1);
-        } else if (relativeX > center + deadZone) {
-          setActiveIndex(activeIndex + 1);
-        }
-      }
-      startTimer();
-    }, {passive:true});
+    let touchTarget = null;
+    carousel.addEventListener('touchstart', (e) => { touchX = e.changedTouches[0].clientX; clearInterval(timer); }, {passive:true});
+    carousel.addEventListener('touchstart', (e) => { touchTarget = e.target.closest('img[data-nft-offset]'); }, {passive:true});
+    carousel.addEventListener('touchend', (e) => { const delta = e.changedTouches[0].clientX - touchX; if (Math.abs(delta) > 45) move(delta < 0 ? 1 : -1); else if (touchTarget) { const offset = Number(touchTarget.dataset.nftOffset); if (offset !== 1) move(offset - 1); } touchTarget = null; startTimer(); }, {passive:true});
     const startTimer = () => { clearInterval(timer); timer = setInterval(() => move(1), 6500); };
     carousel.addEventListener('mouseenter', () => clearInterval(timer));
     carousel.addEventListener('mouseleave', startTimer);
     render(false); startTimer();
-  }
-
-  const medallion = document.querySelector('[data-medallion-prototype]');
-  if (medallion) {
-    const sidewall = medallion.querySelector('[data-medallion-sidewall]');
-    sidewall.innerHTML = Array.from({ length: 48 }, () => '<i></i>').join('');
-    const images = [120,125,128,130,133,134,152,153,154,155,156];
-    const image = medallion.querySelector('[data-medallion-image]');
-    const status = medallion.querySelector('[data-medallion-status]');
-    let index = 0;
-    const cycleMs = 14000;
-    const showNext = () => {
-      image.style.opacity = '0';
-      window.setTimeout(() => {
-        index = (index + 1) % images.length;
-        image.src = `nft-collection/images/kindo-${images[index]}.png`;
-        status.textContent = `${String(index + 1).padStart(2, '0')} / ${String(images.length).padStart(2, '0')}`;
-        image.style.opacity = '1';
-      }, 650);
-    };
-    window.setInterval(showNext, cycleMs);
   }
 })();
