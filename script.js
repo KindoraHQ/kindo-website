@@ -9,6 +9,9 @@
     "TOKENOMICS":"توکنومیک", "Nothing complicated.":"هیچ چیز پیچیده نیست.", "Kindo keeps the numbers easy to understand.":"KINDO اعداد را ساده و قابل‌فهم نگه می‌دارد.", "TOKEN ALLOCATION":"تخصیص توکن", "Public & Liquidity":"عمومی و نقدینگی", "Project Treasury":"خزانه پروژه", "Team":"تیم", "TRANSPARENT WALLETS":"کیف‌پول‌های شفاف", "TRANSPARENCY / ON-CHAIN":"شفافیت / آن‌چین", "Verify. Don’t assume.":"بررسی کنید؛ حدس نزنید.", "ROADMAP":"نقشه راه", "The journey begins here.":"سفر از اینجا آغاز می‌شود.", "IN PROGRESS":"در حال انجام", "NEXT":"بعدی", "LATER":"بعدتر", "OFFICIAL MARKETS & LINKS":"بازارها و لینک‌های رسمی", "Real links only.":"فقط لینک‌های واقعی.", "FAQ":"سؤالات متداول", "Quick answers for travelers.":"پاسخ‌های کوتاه برای مسافران.", "What is KINDO?":"KINDO چیست؟", "Which chain?":"روی کدام شبکه؟", "Is there a tax?":"آیا مالیاتی وجود دارد؟", "What is the supply?":"مقدار عرضه چقدر است؟", "Where can I buy KINDO?":"از کجا می‌توانم KINDO بخرم؟", "Where can I verify the contract and official links?":"قرارداد و لینک‌های رسمی را کجا بررسی کنم؟", "KINDO CULTURE":"فرهنگ KINDO", "Calm energy. Loud spirit.":"انرژی آرام؛ روحیه‌ای پرشور.", "HOW TO BUY":"راهنمای خرید", "Four simple steps.":"چهار قدم ساده.", "Get a wallet":"یک کیف‌پول بسازید", "Connect to Robinhood Chain":"به Robinhood Chain وصل شوید", "Fund your wallet":"کیف‌پولتان را شارژ کنید", "Swap for $KINDO":"با $KINDO معامله کنید", "JUST FOR FUN":"فقط برای سرگرمی", "A memecoin with a story. Not a promise.":"یک میم‌کوین با داستان؛ نه یک وعده.", "JOIN THE JOURNEY":"به این سفر بپیوندید", "Stay calm.":"آرام بمانید.", "Stay curious.":"کنجکاو بمانید.", "Stay Kindo.":"KINDO بمانید.", "CONTACT KINDO":"تماس با KINDO", "Want to reach the team?":"می‌خواهید با تیم در تماس باشید؟"
   };
   const faBlocks = new Map(Object.entries({
+    "“Are we alone in this universe?”": "«آیا در این جهان تنها هستیم؟»",
+    "If you found Kindo, perhaps it was actually Kindo who found you.": "اگر شما کیندو را پیدا کرده‌اید، شاید در واقع این کیندو بوده که شما را پیدا کرده است.",
+    "Stay Kindo.To Kindora. 🚀": "KINDO بمانید.<br><strong>به سوی کیندورا. 🚀</strong>",
     "Kindo’s journey from Kindora has only just begun. New chapters, characters, and adventures may be added over time as the community grows.": "سفر کیندو از کیندورا تازه آغاز شده است. با رشد جامعه، فصل‌ها، شخصیت‌ها و ماجراهای تازه‌ای ممکن است به این داستان اضافه شوند.",
     "Far across the galaxy lies a small, peaceful planet called Kindora. There lived a curious and playful little kid named Kindo, who had carried one question with him for as long as he could remember:": "آن‌سوی دوردست‌های کهکشان، سیاره‌ای کوچک و آرام به نام کیندورا قرار دارد. آنجا کودکی کنجکاو و بازیگوش به نام کیندو زندگی می‌کرد؛ کودکی که از همان ابتدا یک سؤال را با خود داشت:",
     "Kindo spent countless hours gazing at the skies until one day, among countless worlds, he discovered something different: a blue planet, alive and full of wonder — Earth.": "کیندو ساعت‌های بی‌شماری به آسمان خیره می‌شد تا اینکه روزی، میان جهان‌های بی‌شمار، چیزی متفاوت پیدا کرد: سیاره‌ای آبی، زنده و سرشار از شگفتی؛ زمین.",
@@ -26,6 +29,23 @@
     "The fixed supply is 1,000,000,000 KINDO, with no mint function for additional supply.": "عرضه‌ی ثابت برابر با ۱٬۰۰۰٬۰۰۰٬۰۰۰ واحد KINDO است و هیچ تابعی برای ایجاد عرضه‌ی بیشتر وجود ندارد.",
     "The official Buy link is Coming Soon. Do not use unverified market links or contract addresses.": "لینک رسمی خرید به‌زودی منتشر می‌شود. از لینک‌های بازار یا آدرس‌های قراردادی که تأیید نشده‌اند استفاده نکنید.",
     "Telegram access starts through our official channel.": "دسترسی به تلگرام از کانال رسمی ما آغاز می‌شود."
+    ,"1,000,000,000 KINDO. No hidden expansion.": "۱٬۰۰۰٬۰۰۰٬۰۰۰ واحد KINDO؛ بدون افزایش پنهانی.",
+    "No buy tax. No sell tax.": "بدون مالیات خرید و بدون مالیات فروش.",
+    "No additional KINDO after deployment.": "پس از راه‌اندازی، KINDO جدیدی ایجاد نمی‌شود.",
+    "No wallet blacklist mechanism.": "هیچ سازوکار بلک‌لیست کیف‌پول وجود ندارد.",
+    "Published at launch": "هم‌زمان با راه‌اندازی منتشر می‌شود",
+    "KINDO is planned for Robinhood Chain.": "KINDO برای عرضه روی Robinhood Chain برنامه‌ریزی شده است.",
+    "No. KINDO has 0% buy tax and 0% sell tax.": "خیر. KINDO مالیات خرید و فروش ندارد؛ هر دو ۰٪ هستند.",
+    "Use this website’s Transparency and Official Markets & Links sections. Contract, explorer, wallets, and market links will be published only when they are ready to verify.": "بخش‌های «شفافیت» و «بازارها و لینک‌های رسمی» همین وب‌سایت را بررسی کنید. قرارداد، اکسپلورر، کیف‌پول‌ها و لینک‌های بازار فقط زمانی منتشر می‌شوند که آماده‌ی راستی‌آزمایی باشند.",
+    "Community growth, memes, partnerships, and wider discovery.": "رشد جامعه، میم‌ها، همکاری‌ها و معرفی گسترده‌تر.",
+    "Ecosystem growth and whatever the community builds next.": "رشد اکوسیستم و هر چیزی که جامعه در ادامه بسازد.",
+    "Website, official channels, launch preparation, and transparent on-chain details.": "وب‌سایت، کانال‌های رسمی، آماده‌سازی راه‌اندازی و جزئیات شفاف آن‌چین.",
+    "Use Robinhood Wallet for the easiest experience, or use another EVM-compatible wallet such as MetaMask, Rabby, or Trust Wallet.": "برای تجربه‌ای ساده‌تر از Robinhood Wallet استفاده کنید؛ یا یکی از کیف‌پول‌های سازگار با EVM مانند MetaMask، Rabby یا Trust Wallet را انتخاب کنید.",
+    "Robinhood Wallet supports Robinhood Chain natively. Other EVM-compatible wallets may require you to add the network using the official network settings.": "Robinhood Wallet به‌صورت پیش‌فرض از Robinhood Chain پشتیبانی می‌کند. در کیف‌پول‌های سازگار با EVM دیگر، ممکن است لازم باشد شبکه را با تنظیمات رسمی اضافه کنید.",
+    "Make sure you have the required asset for the swap and keep a small amount of ETH for network fees.": "مطمئن شوید دارایی لازم برای معامله را دارید و مقدار کمی ETH نیز برای کارمزد شبکه نگه دارید.",
+    "Use the official Buy link, confirm the contract address, review the transaction, and then swap.": "از لینک رسمی خرید استفاده کنید، آدرس قرارداد را تأیید کنید، تراکنش را بررسی کنید و سپس معامله را انجام دهید.",
+    "Important:": "مهم:",
+    "Never trust a contract address from replies, DMs, or random posts. Verify it here before swapping.": "هرگز به آدرس قراردادی که در پاسخ‌ها، پیام‌های خصوصی یا پست‌های تصادفی می‌بینید اعتماد نکنید. پیش از معامله آن را در همین‌جا بررسی کنید."
   }));
   const translatePage = (enabled) => {
     document.documentElement.lang = enabled ? 'fa' : 'en';
