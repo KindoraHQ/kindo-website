@@ -32,7 +32,7 @@
   if (supply && cfg.totalSupply) supply.textContent = cfg.totalSupply;
   if (tax && cfg.tax) tax.textContent = cfg.tax;
 
-  const email = cfg.contactEmail || 'info@kindora.foundation';
+  const email = cfg.contactEmail || 'info@kindo.world';
   document.querySelectorAll('[data-email-link]').forEach((el) => {
     el.textContent = email;
     el.href = `mailto:${email}`;

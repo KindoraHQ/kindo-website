@@ -7,5 +7,5 @@ window.KINDO_CONFIG = {
   communityUrl: "https://t.me/kindoHQ",
   totalSupply: "1,000,000,000",
   tax: "0%",
-  contactEmail: "info@kindora.foundation"
+  contactEmail: "info@kindo.world"
 };
