@@ -9,6 +9,7 @@
   <link rel="icon" href="assets/kindo-logo.png" />
   <link rel="stylesheet" href="styles.css" />
 <link rel="stylesheet" href="legal.css">
+<script src="risk-gate.js"></script>
 </head>
 <body>
   <div class="noise"></div>
@@ -344,7 +345,7 @@
   <script src="config.js"></script>
   <script src="script.js"></script>
 
-  <section class="risk-notice" id="riskNotice" role="region" aria-labelledby="riskNoticeTitle" hidden>
+  <dialog class="risk-notice" id="riskNotice" aria-modal="true" aria-labelledby="riskNoticeTitle" hidden>
     <h2 id="riskNoticeTitle">Important Notice</h2>
     <p>Crypto-assets and NFTs involve significant risk and may lose part or all of their value, including the possibility of becoming worthless.</p>
     <p>KINDO does not guarantee profit, price, liquidity, or future value. Nothing on this website is financial or investment advice.</p>
@@ -353,7 +354,7 @@
       <button class="risk-continue" id="riskContinue" type="button" disabled>Continue</button>
       <a href="/legal">Legal, Risk &amp; Privacy</a>
     </div>
-  </section>
-  <script src="risk-notice.js"></script>
+  </dialog>
+
 </body>
 </html>

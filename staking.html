@@ -9,6 +9,7 @@
   <link rel="icon" href="assets/kindo-logo.png">
   <link rel="stylesheet" href="staking.css">
 <link rel="stylesheet" href="legal.css">
+<script src="risk-gate.js"></script>
 </head>
 <body>
 <header><div class="wrap nav">
@@ -52,5 +53,15 @@
 </main>
 <footer>KINDO NFT Staking · Coming soon<br><a href="index.html">Back to KINDO home ↗</a><a class="legal-footer-link" href="/legal">Legal, Risk &amp; Privacy</a>
 </footer>
+  <dialog class="risk-notice" id="riskNotice" aria-modal="true" aria-labelledby="riskNoticeTitle" hidden>
+    <h2 id="riskNoticeTitle">Important Notice</h2>
+    <p>Crypto-assets and NFTs involve significant risk and may lose part or all of their value, including the possibility of becoming worthless.</p>
+    <p>KINDO does not guarantee profit, price, liquidity, or future value. Nothing on this website is financial or investment advice.</p>
+    <div class="risk-actions">
+      <label class="risk-check" for="riskAcknowledgement"><input type="checkbox" id="riskAcknowledgement"> <span>I understand the risks.</span></label>
+      <button class="risk-continue" id="riskContinue" type="button" disabled>Continue</button>
+      <a href="/legal">Legal, Risk &amp; Privacy</a>
+    </div>
+  </dialog>
 </body>
 </html>
