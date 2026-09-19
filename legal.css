@@ -6,7 +6,7 @@
 .legal-content a{color:#31d8ff;text-decoration:underline;text-underline-offset:3px}
 .risk-notice[hidden]{display:none!important}
 .risk-notice{position:fixed;z-index:100;bottom:16px;left:50%;transform:translateX(-50%);width:calc(100% - 32px);max-width:850px;max-height:calc(100dvh - 32px);overflow:auto;padding:20px 24px;background:rgba(14,17,33,.97);color:#f8f9ff;border:1px solid rgba(192,132,252,.35);border-radius:18px;box-shadow:0 12px 45px #0006;backdrop-filter:blur(12px);font-size:14px;line-height:1.55}
-.risk-notice h2{font-size:18px;line-height:1.3;letter-spacing:0;margin:0 0 10px}
+.risk-notice h2{font-size:18px;line-height:1.3;letter-spacing:0;margin:0 0 10px;color:#ffd166}
 .risk-notice p{margin:0 0 10px;color:#d5d8e8}
 .risk-actions{display:flex;align-items:center;gap:16px;flex-wrap:wrap;margin-top:16px}
 .risk-check{display:flex;align-items:center;gap:10px;cursor:pointer;margin-right:auto;min-height:44px}
