@@ -8,6 +8,7 @@
   <link rel="canonical" href="https://kindo.world/" />
   <link rel="icon" href="assets/kindo-logo.png" />
   <link rel="stylesheet" href="styles.css" />
+<link rel="stylesheet" href="legal.css">
 </head>
 <body>
   <div class="noise"></div>
@@ -337,9 +338,22 @@
     <div class="footer-brand"><img src="assets/kindo-logo.png" alt="" /><span>KINDO</span></div>
     <span>© <span id="year"></span> KINDO</span>
     <span class="footer-note">Community-driven memecoin. No promises. No guarantees.</span>
-  </footer>
+  <a class="legal-footer-link" href="/legal">Legal, Risk &amp; Privacy</a>
+</footer>
 
   <script src="config.js"></script>
   <script src="script.js"></script>
+
+  <section class="risk-notice" id="riskNotice" role="region" aria-labelledby="riskNoticeTitle" hidden>
+    <h2 id="riskNoticeTitle">Important Notice</h2>
+    <p>Crypto-assets and NFTs involve significant risk and may lose part or all of their value, including the possibility of becoming worthless.</p>
+    <p>KINDO does not guarantee profit, price, liquidity, or future value. Nothing on this website is financial or investment advice.</p>
+    <div class="risk-actions">
+      <label class="risk-check" for="riskAcknowledgement"><input type="checkbox" id="riskAcknowledgement"> <span>I understand the risks.</span></label>
+      <button class="risk-continue" id="riskContinue" type="button" disabled>Continue</button>
+      <a href="/legal">Legal, Risk &amp; Privacy</a>
+    </div>
+  </section>
+  <script src="risk-notice.js"></script>
 </body>
 </html>
