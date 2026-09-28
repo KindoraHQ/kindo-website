@@ -6,5 +6,6 @@ footer.nft-page-footer{display:grid;grid-template-columns:minmax(0,1fr) auto min
 .nft-page-footer .nft-world-link:hover,.nft-page-footer .nft-world-link:focus-visible{color:var(--cyan)}
 .nft-page-footer .legal-footer-link:hover,.nft-page-footer .legal-footer-link:focus-visible{color:var(--gold)}
 .nft-page-footer a:focus-visible{outline:2px solid currentColor;outline-offset:4px}
+.nft-card img{aspect-ratio:4/5;object-fit:contain;object-position:center top;background:#050611}
 @media(max-width:700px){footer.nft-page-footer{grid-template-columns:1fr 1fr;gap:20px 12px}.nft-page-footer .nft-world-link{grid-column:1 / -1;grid-row:1}.nft-page-footer .footer-brand{grid-column:1;grid-row:2}.nft-page-footer .legal-footer-link{grid-column:2;grid-row:2}}
 @media(prefers-reduced-motion:reduce){.nft-page-footer a{transition:none}}
