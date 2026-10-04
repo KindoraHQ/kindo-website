@@ -26,7 +26,7 @@ jobs:
         with:
           repository: Robinhood-OSS/OpenVRF
           path: openvrf
-          ref: 9fb960cfc4d41e38f9d3057bf547e0d9cdcd4cc2
+          ref: "9fb960cfc4d41e38f9d3057bf547e0d9cdcd4cc2"
           fetch-depth: 1
       - uses: foundry-rs/foundry-toolchain@v1
       - name: Check chain and build
@@ -55,15 +55,15 @@ jobs:
         with:
           repository: Robinhood-OSS/OpenVRF
           path: openvrf
-          ref: 9fb960cfc4d41e38f9d3057bf547e0d9cdcd4cc2
+          ref: "9fb960cfc4d41e38f9d3057bf547e0d9cdcd4cc2"
           fetch-depth: 1
       - uses: foundry-rs/foundry-toolchain@v1
       - name: Verify roles and chain
         working-directory: openvrf
         shell: bash
         env:
-          OWNER_ADDRESS: 0xDCf356f2C687e028FAC39De57dfE209258F9Fa3F
-          RELAYER_ADDRESS: 0x1BB3884AE2C2a27dEc3aB537F93cFE4961344401
+          OWNER_ADDRESS: "0xDCf356f2C687e028FAC39De57dfE209258F9Fa3F"
+          RELAYER_ADDRESS: "0x1BB3884AE2C2a27dEc3aB537F93cFE4961344401"
         run: |
           set -euo pipefail
           test "$(cast chain-id --rpc-url "$RPC_URL")" = "$EXPECTED_CHAIN_ID"
@@ -74,8 +74,8 @@ jobs:
         working-directory: openvrf
         shell: bash
         env:
-          OWNER_ADDRESS: 0xDCf356f2C687e028FAC39De57dfE209258F9Fa3F
-          RELAYER_ADDRESS: 0x1BB3884AE2C2a27dEc3aB537F93cFE4961344401
+          OWNER_ADDRESS: "0xDCf356f2C687e028FAC39De57dfE209258F9Fa3F"
+          RELAYER_ADDRESS: "0x1BB3884AE2C2a27dEc3aB537F93cFE4961344401"
           REQUEST_FEE_WEI: "0"
           DEPLOYER_PRIVATE_KEY: ${{ secrets.KINDO_TESTNET_OWNER_PRIVATE_KEY }}
         run: |
