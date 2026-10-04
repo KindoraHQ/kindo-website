@@ -43,8 +43,7 @@ jobs:
             "setRelayerAuthorization(address,bool)" \
             "$BACKUP_RELAYER" true \
             --rpc-url "$RPC_URL" \
-            --private-key "$OWNER_PRIVATE_KEY" \
-            --slow
+            --private-key "$OWNER_PRIVATE_KEY"
       - name: Verify backup authorization
         shell: bash
         run: |
