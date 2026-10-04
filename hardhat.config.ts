@@ -8,6 +8,7 @@ export default defineConfig({
   plugins: [toolbox],
   solidity: { version: "0.8.28", settings: { optimizer: { enabled: true, runs: 200 }, metadata: { bytecodeHash: "ipfs" } } },
   networks: {
+    default: { type: "edr-simulated", chainType: "l1", initialDate: "2024-09-28T00:00:00.000Z", blockGasLimit: 30000000, transactionGasCap: false },
     robinhoodTestnet: { type: "http", url: process.env.ROBINHOOD_TESTNET_RPC_URL ?? "https://rpc.testnet.chain.robinhood.com", chainId: 46630, accounts },
     robinhoodMainnet: { type: "http", url: process.env.ROBINHOOD_MAINNET_RPC_URL ?? "https://rpc.mainnet.chain.robinhood.com", chainId: 4663, accounts },
   },
@@ -17,3 +18,7 @@ export default defineConfig({
   },
   verify: { blockscout: { enabled: true, apiKey: process.env.BLOCKSCOUT_API_KEY ?? "empty" } },
 });
+
+
+
+
