@@ -1,0 +1,52 @@
+name: OpenVRF authorize backup relayer (Robinhood testnet only)
+
+on:
+  workflow_dispatch:
+    inputs:
+      confirmation:
+        description: "Type AUTHORIZE_KINDO_BACKUP_TESTNET"
+        required: true
+        type: string
+
+permissions:
+  contents: read
+
+env:
+  RPC_URL: "https://rpc.testnet.chain.robinhood.com"
+  EXPECTED_CHAIN_ID: "46630"
+  ROUTER: "0xe68c6bd57bc2497eccebb5bae5ae8e618b3daaaa"
+  BACKUP_RELAYER: "0xE50Ca16E7f0bdd7a7F47d1B1A8AD0c9d63037305"
+
+jobs:
+  authorize:
+    if: inputs.confirmation == 'AUTHORIZE_KINDO_BACKUP_TESTNET'
+    runs-on: ubuntu-latest
+    environment: kindo-testnet-deploy
+    steps:
+      - uses: foundry-rs/foundry-toolchain@v1
+      - name: Verify testnet and owner
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(cast chain-id --rpc-url "$RPC_URL")" = "$EXPECTED_CHAIN_ID"
+          OWNER=$(cast call "$ROUTER" "owner()(address)" --rpc-url "$RPC_URL")
+          test "${OWNER,,}" = "0xdcf356f2c687e028fac39de57dfe209258f9fa3f"
+          test -n "${{ secrets.KINDO_TESTNET_OWNER_PRIVATE_KEY }}"
+      - name: Authorize backup relayer
+        shell: bash
+        env:
+          OWNER_PRIVATE_KEY: ${{ secrets.KINDO_TESTNET_OWNER_PRIVATE_KEY }}
+        run: |
+          set -euo pipefail
+          test "$(cast chain-id --rpc-url "$RPC_URL")" = "$EXPECTED_CHAIN_ID"
+          cast send "$ROUTER" \
+            "setRelayerAuthorization(address,bool)" \
+            "$BACKUP_RELAYER" true \
+            --rpc-url "$RPC_URL" \
+            --private-key "$OWNER_PRIVATE_KEY" \
+            --slow
+      - name: Verify backup authorization
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(cast call "$ROUTER" "authorizedRelayers(address)(bool)" "$BACKUP_RELAYER" --rpc-url "$RPC_URL")" = "true"
