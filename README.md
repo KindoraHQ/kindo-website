@@ -118,3 +118,17 @@ Open `index.html` to preview the static site. Future public contract and market 
 - [Robinhood Chain deployment guide](https://docs.robinhood.com/chain/deploy-smart-contracts/)
 - [Robinhood Chain network configuration](https://docs.robinhood.com/chain/connecting/)
 - [OpenZeppelin Contracts 5.x](https://docs.openzeppelin.com/contracts/5.x)
+
+## Team Vesting
+
+`contracts/KindoTeamVesting.sol` is a separate, minimal, non-upgradeable vesting wallet for any ERC-20 allocation. It does not modify `Kindo.sol`, mint tokens, or encode a Team percentage or token amount. The allocation is simply the KINDO transferred to the vesting address.
+
+The beneficiary and start timestamp are supplied at deployment and stored immutably. Vesting uses fixed 30-day months and cumulative step milestones:
+
+- before month 6: 0%
+- month 6 through before month 12: 25%
+- month 12 through before month 18: 50%
+- month 18 through before month 24: 75%
+- month 24 onward: 100%
+
+There is no linear vesting between milestones. Only the immutable beneficiary can call `release`; released tokens are transferred directly to that beneficiary. The contract rejects native currency and has no owner, admin, cancellation, beneficiary-change, upgrade, emergency-withdrawal, tax, pause, or blacklist mechanism.

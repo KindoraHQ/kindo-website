@@ -30,3 +30,13 @@ The full npm audit reports advisories in development-only Hardhat test/verificat
 ## Limitations
 
 This is a focused code and configuration review, not an independent third-party audit. Deployment wallet handling, token distribution, liquidity operations, and publication of official addresses do not occur in the contract and require separate operational review.
+
+## Team Vesting Security Review
+
+The Team vesting contract is intentionally separate from `Kindo.sol`. It uses OpenZeppelin `IERC20` and `SafeERC20`, while implementing the small schedule calculation directly instead of inheriting `VestingWallet`. This avoids `VestingWallet`'s `Ownable` beneficiary semantics: in OpenZeppelin, ownership can be transferred, which can transfer the beneficiary and allow an economic sale of unvested tokens. Here, `beneficiary`, `token`, and `start` are immutable and there is no ownership or administrative surface.
+
+The only token movement function is `release()`, callable only by the immutable beneficiary. It transfers only the currently vested amount and records cumulative releases. The schedule is fixed at 6/12/18/24 30-day-month milestones, with no linear interpolation. Deposited amount is discovered from the contract balance plus previously released amount; no Team percentage or fixed allocation is encoded.
+
+The contract has no minting, fees, taxes, blacklist, pause, proxy, upgrade, cancellation, emergency withdrawal, arbitrary token withdrawal, or schedule mutation. Native currency is rejected. Tokens sent to the contract are therefore subject only to the fixed schedule and beneficiary release path.
+
+The tests cover every milestone plateau, partial releases, multiple deposited amounts, unauthorized release attempts, immutable schedule/beneficiary surface, and native-currency rejection. This is an internal review, not an independent audit. Do not deploy or fund the contract until an external review and deployment-parameter review are complete.
