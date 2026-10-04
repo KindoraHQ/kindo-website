@@ -1,0 +1,55 @@
+name: KINDO OpenVRF Robinhood testnet validation (manual)
+
+on:
+  workflow_dispatch:
+    inputs:
+      confirmation:
+        description: "Type RUN_KINDO_TESTNET_VALIDATION"
+        required: true
+        type: string
+
+permissions:
+  contents: read
+
+env:
+  RPC_URL: "https://rpc.testnet.chain.robinhood.com"
+  EXPECTED_CHAIN_ID: "46630"
+  ROUTER: "0xe68c6bd57bc2497eccebb5bae5ae8e618b3daaaa"
+  OWNER: "0xDCf356f2C687e028FAC39De57dfE209258F9Fa3F"
+  PRIMARY_RELAYER: "0x1BB3884AE2C2a27dEc3aB537F93cFE4961344401"
+  BACKUP_RELAYER: "0xE50Ca16E7f0bdd7a7F47d1B1A8AD0c9d63037305"
+
+jobs:
+  validate:
+    if: inputs.confirmation == 'RUN_KINDO_TESTNET_VALIDATION'
+    runs-on: ubuntu-latest
+    environment: kindo-testnet-deploy
+    steps:
+      - uses: actions/checkout@v4
+      - uses: foundry-rs/foundry-toolchain@v1
+      - name: Verify required non-secret configuration
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(cast chain-id --rpc-url "$RPC_URL")" = "$EXPECTED_CHAIN_ID"
+          test "${{ secrets.KINDO_TESTNET_ALCHEMY_API_KEY }}" != ""
+          test "${{ secrets.KINDO_TESTNET_OWNER_PRIVATE_KEY }}" != ""
+          test "${{ secrets.KINDO_TESTNET_PRIMARY_RELAYER_PRIVATE_KEY }}" != ""
+          test "${{ secrets.KINDO_TESTNET_BACKUP_RELAYER_PRIVATE_KEY }}" != ""
+          echo "Alchemy WebSocket credential is present (value not printed)."
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - name: Install and compile KINDO project
+        run: npm ci --ignore-scripts && npx hardhat compile
+      - name: Run full local test suite
+        run: npx hardhat test
+      - name: Verify Router and relayers on-chain
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(cast call "$ROUTER" "owner()(address)" --rpc-url "$RPC_URL" | tr '[:upper:]' '[:lower:]')" = "${OWNER,,}"
+          test "$(cast call "$ROUTER" "authorizedRelayers(address)(bool)" "$PRIMARY_RELAYER" --rpc-url "$RPC_URL")" = "true"
+          test "$(cast call "$ROUTER" "authorizedRelayers(address)(bool)" "$BACKUP_RELAYER" --rpc-url "$RPC_URL")" = "true"
+          echo "Router owner and both relayer authorizations verified on chain 46630."
