@@ -1,0 +1,93 @@
+name: OpenVRF Robinhood testnet deployment (manual and guarded)
+
+on:
+  workflow_dispatch:
+    inputs:
+      confirmation:
+        description: "Type DEPLOY_KINDO_OPENVRF_TESTNET to authorize the guarded testnet deployment"
+        required: true
+        type: string
+
+permissions:
+  contents: read
+
+env:
+  RPC_URL: https://rpc.testnet.chain.robinhood.com
+  EXPECTED_CHAIN_ID: "46630"
+
+jobs:
+  preflight:
+    runs-on: ubuntu-latest
+    outputs:
+      ready: ${{ steps.check.outputs.ready }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/checkout@v4
+        with:
+          repository: Robinhood-OSS/OpenVRF
+          path: openvrf
+          ref: 9fb960cfc4d41e38f9d3057bf547e0d9cdcd4cc2
+          fetch-depth: 1
+      - uses: foundry-rs/foundry-toolchain@v1
+      - name: Check chain and build
+        id: check
+        working-directory: openvrf
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(cast chain-id --rpc-url "$RPC_URL")" = "$EXPECTED_CHAIN_ID"
+          forge build
+          echo "ready=true" >> "$GITHUB_OUTPUT"
+      - name: Refuse without exact confirmation
+        if: inputs.confirmation != 'DEPLOY_KINDO_OPENVRF_TESTNET'
+        run: |
+          echo "Exact confirmation was not supplied; no deployment job will run."
+          exit 1
+
+  deploy-router:
+    needs: preflight
+    if: needs.preflight.outputs.ready == 'true' && inputs.confirmation == 'DEPLOY_KINDO_OPENVRF_TESTNET'
+    runs-on: ubuntu-latest
+    environment: kindo-testnet-deploy
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/checkout@v4
+        with:
+          repository: Robinhood-OSS/OpenVRF
+          path: openvrf
+          ref: 9fb960cfc4d41e38f9d3057bf547e0d9cdcd4cc2
+          fetch-depth: 1
+      - uses: foundry-rs/foundry-toolchain@v1
+      - name: Verify roles and chain
+        working-directory: openvrf
+        shell: bash
+        env:
+          OWNER_ADDRESS: 0xDCf356f2C687e028FAC39De57dfE209258F9Fa3F
+          RELAYER_ADDRESS: 0x1BB3884AE2C2a27dEc3aB537F93cFE4961344401
+        run: |
+          set -euo pipefail
+          test "$(cast chain-id --rpc-url "$RPC_URL")" = "$EXPECTED_CHAIN_ID"
+          test -n "$OWNER_ADDRESS" && test -n "$RELAYER_ADDRESS"
+          test "${{ secrets.KINDO_TESTNET_OWNER_PRIVATE_KEY }}" != ""
+          forge build
+      - name: Deploy official OpenVRF Router
+        working-directory: openvrf
+        shell: bash
+        env:
+          OWNER_ADDRESS: 0xDCf356f2C687e028FAC39De57dfE209258F9Fa3F
+          RELAYER_ADDRESS: 0x1BB3884AE2C2a27dEc3aB537F93cFE4961344401
+          REQUEST_FEE_WEI: "0"
+          DEPLOYER_PRIVATE_KEY: ${{ secrets.KINDO_TESTNET_OWNER_PRIVATE_KEY }}
+        run: |
+          set -euo pipefail
+          test "$(cast chain-id --rpc-url "$RPC_URL")" = "$EXPECTED_CHAIN_ID"
+          forge script script/Deploy.s.sol:Deploy \
+            --rpc-url "$RPC_URL" \
+            --private-key "$DEPLOYER_PRIVATE_KEY" \
+            --broadcast \
+            --slow
+      - name: Print next authorization command (no secret)
+        shell: bash
+        run: |
+          echo "Router address must be recorded from the deployment receipt."
+          echo "The owner must then authorize the backup relayer and KINDO consumer."
