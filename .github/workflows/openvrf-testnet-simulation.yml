@@ -1,0 +1,64 @@
+name: OpenVRF testnet simulation (no broadcast)
+
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - ".github/workflows/openvrf-testnet-simulation.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  simulate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      RPC_URL: https://rpc.testnet.chain.robinhood.com
+      # Deterministic non-secret addresses used only for forge simulation.
+      OWNER_ADDRESS: "0x0000000000000000000000000000000000000001"
+      RELAYER_ADDRESS: "0x0000000000000000000000000000000000000002"
+      REQUEST_FEE_WEI: "0"
+    steps:
+      - name: Check out KINDO repository
+        uses: actions/checkout@v4
+
+      - name: Check out official OpenVRF
+        uses: actions/checkout@v4
+        with:
+          repository: Robinhood-OSS/OpenVRF
+          path: openvrf
+          # Pin the source used by this validation workflow.
+          ref: 9fb960cfc4d41e38f9d3057bf547e0d9cdcd4cc2
+          fetch-depth: 1
+
+      - name: Install Foundry
+        uses: foundry-rs/foundry-toolchain@v1
+
+      - name: Verify toolchain
+        shell: bash
+        run: |
+          set -euo pipefail
+          forge --version
+          cast --version
+
+      - name: Verify Robinhood Chain testnet
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(cast chain-id --rpc-url "$RPC_URL")" = "46630"
+
+      - name: Build official OpenVRF
+        working-directory: openvrf
+        shell: bash
+        run: |
+          set -euo pipefail
+          forge build
+
+      - name: Simulate Router deployment (never broadcast)
+        working-directory: openvrf
+        shell: bash
+        run: |
+          set -euo pipefail
+          forge script script/Deploy.s.sol:Deploy \
+            --rpc-url "$RPC_URL"
