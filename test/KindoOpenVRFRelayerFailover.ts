@@ -35,6 +35,26 @@ describe("Kindo OpenVRF relayer failover (local-only)", function () {
     expect(await consumer.words(7)).to.equal(7);
   });
 
+  it("lets the backup directly fulfill when the primary is silent", async function () {
+    const { backup, router, consumer } = await deploy();
+    const suppliedWord = 0xfeedcafen;
+    await consumer.request(12);
+
+    // The primary is unavailable in this scenario: it submits no fulfillment.
+    expect((await router.requests(1)).fulfilled).to.equal(false);
+    await router.connect(backup).fulfill(1, suppliedWord);
+
+    const request = await router.requests(1);
+    expect(request.word).to.equal(suppliedWord);
+    expect(request.fulfilled).to.equal(true);
+    expect(await consumer.fulfilled(12)).to.equal(true);
+    expect(await consumer.words(12)).to.equal(suppliedWord);
+
+    await expect(router.connect(backup).retryCallback(1)).to.be.revertedWithCustomError(router, "AlreadyFulfilled");
+    await expect(router.connect(backup).fulfill(1, 0x1234n)).to.be.revertedWithCustomError(router, "AlreadyFulfilled");
+    expect(await consumer.words(12)).to.equal(suppliedWord);
+  });
+
   it("does not permit a second result or a reroll after successful delivery", async function () {
     const { primary, backup, router, consumer } = await deploy();
     await consumer.request(9);
