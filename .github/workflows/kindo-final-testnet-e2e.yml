@@ -41,7 +41,11 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - name: Checkout official OpenVRF
-        run: git clone --depth 1 https://github.com/Robinhood-OSS/OpenVRF.git openvrf
+        run: |
+          rm -rf openvrf-upstream
+          git clone --depth 1 https://github.com/Robinhood-OSS/OpenVRF.git openvrf-upstream
+          test -f openvrf-upstream/relayer/main.mjs
+          test -f openvrf-upstream/package.json
       - uses: actions/setup-node@v4
         with:
           node-version: 22
@@ -52,30 +56,29 @@ jobs:
       - run: npm ci --ignore-scripts
       - run: npx hardhat compile
       - name: Prepare OpenVRF runtime
-        run: mkdir -p openvrf/secrets
+        run: mkdir -p openvrf-upstream/secrets
       - name: Install relayer dependencies
-        working-directory: openvrf
+        working-directory: openvrf-upstream
         run: npm ci --ignore-scripts
       - name: Request one real randomness value
         run: npx hardhat run scripts/nft/request-test-consumer.ts --network robinhoodTestnet > e2e-request.json
       - name: Start primary relayer and stop it before fulfillment
         shell: bash
         run: |
-          mkdir -p openvrf/secrets
-          printf '%s' "$PRIMARY_RELAYER_PRIVATE_KEY" > openvrf/secrets/primary-key
+          printf '%s' "$PRIMARY_RELAYER_PRIVATE_KEY" > openvrf-upstream/secrets/primary-key
           START_BLOCK=$(($(cast block-number --rpc-url "$ROBINHOOD_TESTNET_RPC_URL") - 10000))
-          export RPC_URL="$ROBINHOOD_TESTNET_RPC_URL" WS_URL="wss://robinhood-testnet.g.alchemy.com/v2/$KINDO_TESTNET_ALCHEMY_API_KEY" CHAIN_ID=46630 ROUTER_ADDRESS="$ROUTER_ADDRESS" RELAY_ALL_CONSUMERS=true RELAYER_ADDRESSES="0x1BB3884AE2C2a27dEc3aB537F93cFE4961344401,0xE50Ca16E7f0bdd7a7F47d1B1A8AD0c9d63037305" RELAYER_KEY_FILE="$GITHUB_WORKSPACE/openvrf/secrets/primary-key" DATABASE_URL="$DATABASE_URL" START_BLOCK="$START_BLOCK" RELAYER_FAILOVER_SECONDS=60 RELAYER_LEASE_SECONDS=120 RECEIPT_TIMEOUT_SECONDS=30 MAX_GAS_PRICE_GWEI=1000
-          (cd openvrf && node relayer/main.mjs > ../primary-relayer.log 2>&1) & echo $! > primary.pid
+          export RPC_URL="$ROBINHOOD_TESTNET_RPC_URL" WS_URL="wss://robinhood-testnet.g.alchemy.com/v2/$KINDO_TESTNET_ALCHEMY_API_KEY" CHAIN_ID=46630 ROUTER_ADDRESS="$ROUTER_ADDRESS" RELAY_ALL_CONSUMERS=true RELAYER_ADDRESSES="0x1BB3884AE2C2a27dEc3aB537F93cFE4961344401,0xE50Ca16E7f0bdd7a7F47d1B1A8AD0c9d63037305" RELAYER_KEY_FILE="$GITHUB_WORKSPACE/openvrf-upstream/secrets/primary-key" DATABASE_URL="$DATABASE_URL" START_BLOCK="$START_BLOCK" RELAYER_FAILOVER_SECONDS=60 RELAYER_LEASE_SECONDS=120 RECEIPT_TIMEOUT_SECONDS=30 MAX_GAS_PRICE_GWEI=1000
+          (cd openvrf-upstream && node relayer/main.mjs > ../primary-relayer.log 2>&1) & echo $! > primary.pid
           sleep 8
           kill "$(cat primary.pid)" || true
           sleep 65
       - name: Start backup relayer and fulfill the same request
         shell: bash
         run: |
-          printf '%s' "$BACKUP_RELAYER_PRIVATE_KEY" > openvrf/secrets/backup-key
+          printf '%s' "$BACKUP_RELAYER_PRIVATE_KEY" > openvrf-upstream/secrets/backup-key
           START_BLOCK=$(($(cast block-number --rpc-url "$ROBINHOOD_TESTNET_RPC_URL") - 10000))
-          export RPC_URL="$ROBINHOOD_TESTNET_RPC_URL" WS_URL="wss://robinhood-testnet.g.alchemy.com/v2/$KINDO_TESTNET_ALCHEMY_API_KEY" CHAIN_ID=46630 ROUTER_ADDRESS="$ROUTER_ADDRESS" RELAY_ALL_CONSUMERS=true RELAYER_ADDRESSES="0x1BB3884AE2C2a27dEc3aB537F93cFE4961344401,0xE50Ca16E7f0bdd7a7F47d1B1A8AD0c9d63037305" RELAYER_KEY_FILE="$GITHUB_WORKSPACE/openvrf/secrets/backup-key" DATABASE_URL="$DATABASE_URL" START_BLOCK="$START_BLOCK" RELAYER_FAILOVER_SECONDS=60 RELAYER_LEASE_SECONDS=120 RECEIPT_TIMEOUT_SECONDS=30 MAX_GAS_PRICE_GWEI=1000
-          (cd openvrf && node relayer/main.mjs > ../backup-relayer.log 2>&1) & echo $! > backup.pid
+          export RPC_URL="$ROBINHOOD_TESTNET_RPC_URL" WS_URL="wss://robinhood-testnet.g.alchemy.com/v2/$KINDO_TESTNET_ALCHEMY_API_KEY" CHAIN_ID=46630 ROUTER_ADDRESS="$ROUTER_ADDRESS" RELAY_ALL_CONSUMERS=true RELAYER_ADDRESSES="0x1BB3884AE2C2a27dEc3aB537F93cFE4961344401,0xE50Ca16E7f0bdd7a7F47d1B1A8AD0c9d63037305" RELAYER_KEY_FILE="$GITHUB_WORKSPACE/openvrf-upstream/secrets/backup-key" DATABASE_URL="$DATABASE_URL" START_BLOCK="$START_BLOCK" RELAYER_FAILOVER_SECONDS=60 RELAYER_LEASE_SECONDS=120 RECEIPT_TIMEOUT_SECONDS=30 MAX_GAS_PRICE_GWEI=1000
+          (cd openvrf-upstream && node relayer/main.mjs > ../backup-relayer.log 2>&1) & echo $! > backup.pid
           sleep 120
       - name: Verify on-chain result and same randomness
         run: npx hardhat run scripts/nft/verify-test-consumer.ts --network robinhoodTestnet
