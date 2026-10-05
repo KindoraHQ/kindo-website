@@ -1,0 +1,55 @@
+name: KINDO Epoch NFT Testnet integration (manual)
+
+on:
+  workflow_dispatch:
+    inputs:
+      confirmation:
+        description: "Type RUN_KINDO_EPOCH_NFT_TESTNET"
+        required: true
+        type: string
+
+permissions:
+  contents: read
+
+jobs:
+  integration:
+    if: inputs.confirmation == 'RUN_KINDO_EPOCH_NFT_TESTNET'
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    environment: kindo-testnet-deploy
+    env:
+      KINDO_TESTNET_OWNER_PRIVATE_KEY: ${{ secrets.KINDO_TESTNET_OWNER_PRIVATE_KEY }}
+      ROBINHOOD_TESTNET_RPC_URL: "https://rpc.testnet.chain.robinhood.com"
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - uses: foundry-rs/foundry-toolchain@v1
+      - name: Verify testnet secret and chain
+        run: |
+          test -n "$KINDO_TESTNET_OWNER_PRIVATE_KEY"
+          test "$(cast chain-id --rpc-url "$ROBINHOOD_TESTNET_RPC_URL")" = "46630"
+      - run: npm ci --ignore-scripts
+      - name: Compile
+        run: npx hardhat compile
+      - name: Deploy KindoEpochOpenVRFNFT
+        run: |
+          npx hardhat run scripts/nft/deploy-kindo-epoch-testnet.ts --network robinhoodTestnet | tee epoch-deployment.log
+          line=$(awk '/"contract"/{v=$0} END{print v}' epoch-deployment.log)
+          test -n "$line"
+          address=$(node -e 'const j=JSON.parse(process.argv[1]); process.stdout.write(j.contract)' "$line")
+          test -n "$address"
+          echo "KINDO_EPOCH_NFT_ADDRESS=$address" >> "$GITHUB_ENV"
+          echo "deployed_address=$address" >> "$GITHUB_OUTPUT"
+        id: deploy
+      - name: Run KindoEpochOpenVRFNFT integration
+        run: npx hardhat run scripts/nft/run-kindo-epoch-testnet.ts --network robinhoodTestnet
+      - name: Upload non-secret evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: kindo-epoch-nft-testnet-evidence
+          path: epoch-deployment.log
+          if-no-files-found: ignore

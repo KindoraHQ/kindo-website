@@ -2,7 +2,8 @@ import "dotenv/config";
 import toolbox from "@nomicfoundation/hardhat-toolbox-mocha-ethers";
 import { defineConfig } from "hardhat/config";
 
-const accounts = process.env.DEPLOYER_PRIVATE_KEY ? [process.env.DEPLOYER_PRIVATE_KEY] : [];
+const deployerKey = process.env.KINDO_TESTNET_OWNER_PRIVATE_KEY ?? process.env.DEPLOYER_PRIVATE_KEY;
+const accounts = deployerKey ? [deployerKey] : [];
 
 export default defineConfig({
   plugins: [toolbox],
