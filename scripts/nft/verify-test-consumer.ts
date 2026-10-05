@@ -1,0 +1,17 @@
+import { readFileSync } from "node:fs";
+import { network } from "hardhat";
+const ROUTER = "0xe68c6bd57bc2497eccebb5bae5ae8e618b3daaaa";
+const CONSUMER = "0x3fB6857fa5fFE0d507e0310B08064B6fC7AB0334";
+const { ethers } = await network.connect();
+if ((await ethers.provider.getNetwork()).chainId !== 46630n) throw new Error("wrong chain");
+const lines = readFileSync("e2e-request.json", "utf8").trim().split(/\r?\n/).map((x) => JSON.parse(x));
+const req = lines.findLast((x) => x.routerRequestId);
+if (!req) throw new Error("request evidence missing");
+const router = await ethers.getContractAt(["function requests(uint256) view returns (address,uint64,uint32,bool,bool,uint256,uint256)"], ROUTER);
+const consumer = await ethers.getContractAt(["function fulfilled(uint256) view returns (bool)", "function randomWords(uint256) view returns (uint256)"], CONSUMER);
+const state = await router.requests(req.routerRequestId);
+if (!state[3] || !state[4]) throw new Error("request not fulfilled and delivered");
+if (!(await consumer.fulfilled(req.localId))) throw new Error("consumer not fulfilled");
+const word = await consumer.randomWords(req.localId);
+if (word !== state[5]) throw new Error("randomness mismatch");
+console.log(JSON.stringify({ chainId: "46630", consumer: CONSUMER, router: ROUTER, requestTx: req.requestTx, routerRequestId: req.routerRequestId, fulfilled: state[3], delivered: state[4], randomWord: word.toString(), sameRandomnessVerified: true }));
