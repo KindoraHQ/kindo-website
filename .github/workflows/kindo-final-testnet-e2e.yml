@@ -74,3 +74,4 @@ jobs:
             primary-relayer.log
             backup-relayer.log
           retention-days: 14
+
