@@ -96,4 +96,17 @@ jobs:
             primary-relayer.log
             backup-relayer.log
           retention-days: 14
+      - name: Publish E2E diagnostics in summary
+        if: always()
+        shell: bash
+        run: |
+          {
+            echo '## E2E diagnostics'
+            echo '### Request evidence'
+            if [ -f e2e-request.json ]; then cat e2e-request.json; else echo 'e2e-request.json was not created'; fi
+            echo '### Primary relayer log'
+            if [ -f primary-relayer.log ]; then tail -n 200 primary-relayer.log; else echo 'primary-relayer.log was not created'; fi
+            echo '### Backup relayer log'
+            if [ -f backup-relayer.log ]; then tail -n 200 backup-relayer.log; else echo 'backup-relayer.log was not created'; fi
+          } >> "$GITHUB_STEP_SUMMARY"
 
