@@ -37,7 +37,10 @@ jobs:
       - run: npm ci --ignore-scripts
       - run: npx hardhat compile
       - name: Start OpenVRF database
-        run: docker compose -f openvrf/compose.yaml up -d postgres
+        run: |
+          mkdir -p openvrf/secrets
+          : > openvrf/secrets/relayer-key
+          docker compose -f openvrf/compose.yaml up -d postgres
       - name: Install relayer dependencies
         working-directory: openvrf
         run: npm ci --ignore-scripts
