@@ -1,0 +1,33 @@
+name: KINDO Testnet consumer deployment (manual)
+
+on:
+  workflow_dispatch:
+    inputs:
+      confirmation:
+        description: "Type DEPLOY_KINDO_TEST_CONSUMER"
+        required: true
+        type: string
+
+permissions:
+  contents: read
+
+jobs:
+  deploy:
+    if: inputs.confirmation == 'DEPLOY_KINDO_TEST_CONSUMER'
+    runs-on: ubuntu-latest
+    environment: kindo-testnet-deploy
+    env:
+      DEPLOYER_PRIVATE_KEY: ${{ secrets.KINDO_TESTNET_OWNER_PRIVATE_KEY }}
+      ROBINHOOD_TESTNET_RPC_URL: "https://rpc.testnet.chain.robinhood.com"
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - name: Verify testnet only
+        uses: foundry-rs/foundry-toolchain@v1
+      - run: test "$(cast chain-id --rpc-url "$ROBINHOOD_TESTNET_RPC_URL")" = "46630"
+      - run: npm ci --ignore-scripts
+      - run: npx hardhat compile
+      - run: npx hardhat run scripts/nft/deploy-test-consumer.ts --network robinhoodTestnet
