@@ -40,6 +40,8 @@ jobs:
       DATABASE_URL: "postgresql://openvrf:openvrf-ci-password@127.0.0.1:5432/openvrf"
     steps:
       - uses: actions/checkout@v4
+      - name: Checkout official OpenVRF
+        run: git clone --depth 1 https://github.com/Robinhood-OSS/OpenVRF.git openvrf
       - uses: actions/setup-node@v4
         with:
           node-version: 22
