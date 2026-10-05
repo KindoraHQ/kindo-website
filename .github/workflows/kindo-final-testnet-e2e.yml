@@ -83,7 +83,16 @@ jobs:
           (cd openvrf-upstream && node relayer/main.mjs > ../backup-relayer.log 2>&1) & echo $! > backup.pid
           sleep 120
       - name: Verify on-chain result and same randomness
-        run: npx hardhat run scripts/nft/verify-test-consumer.ts --network robinhoodTestnet
+        shell: bash
+        run: |
+          set +e
+          npx hardhat run scripts/nft/verify-test-consumer.ts --network robinhoodTestnet 2>&1 | tee verify-consumer.log
+          status=${PIPESTATUS[0]}
+          {
+            echo '### Verifier output'
+            cat verify-consumer.log
+          } >> "$GITHUB_STEP_SUMMARY"
+          exit "$status"
       - name: Run relevant tests
         run: npx hardhat test test/KindoOpenVRFAdapter.ts test/KindoOpenVRFRelayerFailover.ts
       - name: Upload E2E evidence
@@ -95,6 +104,7 @@ jobs:
             e2e-request.json
             primary-relayer.log
             backup-relayer.log
+            verify-consumer.log
           retention-days: 14
       - name: Publish E2E diagnostics in summary
         if: always()
