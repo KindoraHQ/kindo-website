@@ -23,7 +23,8 @@ const send = async (label: string, estimate: () => Promise<bigint>, submit: () =
   const sent = await submit(); await sent.wait(); return sent.hash;
 };
 
-await waitUntil(async () => { try { return await epoch() >= 0; } catch { return false; } }, "sale start");
+// Epoch 0 must remain empty. Read the live chain timestamp until epoch 1 is active.
+await waitUntil(async () => { try { return await epoch() >= 1; } catch { return false; } }, "epoch 1 start");
 const minted = Number(await nft.publicMinted());
 if (minted === 0) {
   const e = await epoch();

@@ -29,4 +29,9 @@ console.log(JSON.stringify({ network: "Robinhood Chain Testnet", chainId: chainI
 const contract = await factory.deploy(config);
 const deploymentTx = contract.deploymentTransaction();
 await contract.waitForDeployment();
-console.log(JSON.stringify({ contract: await contract.getAddress(), deploymentTx: deploymentTx?.hash, start: start.toString() }));
+const deployedAddress = await contract.getAddress();
+if (!ethers.isAddress(deployedAddress) || !/^0x[0-9a-fA-F]{40}$/.test(deployedAddress)) {
+  throw new Error("Deployment returned an invalid contract address");
+}
+const receipt = deploymentTx ? await deploymentTx.wait() : null;
+console.log(JSON.stringify({ deployedAddress, deploymentTx: deploymentTx?.hash, deploymentBlock: receipt?.blockNumber, start: start.toString() }));
