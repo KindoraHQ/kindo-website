@@ -28,7 +28,7 @@ contract MockAuthorizedOpenVRFRouter {
         authorizedRelayer[backupRelayer] = true;
     }
 
-    function requestRandomness(uint32) external returns (uint256 requestId) {
+    function requestRandomness(uint32) external payable returns (uint256 requestId) {
         requestId = nextRequestId++;
         requests[requestId] = Request(msg.sender, 0, true, false, false);
     }
