@@ -16,6 +16,18 @@ jobs:
     if: inputs.confirmation == 'RUN_KINDO_FINAL_TESTNET_E2E'
     runs-on: ubuntu-latest
     environment: kindo-testnet-deploy
+    services:
+      postgres:
+        image: postgres:17-alpine
+        env:
+          POSTGRES_DB: openvrf
+          POSTGRES_USER: openvrf
+          POSTGRES_PASSWORD: openvrf-ci-password
+        options: >-
+          --health-cmd "pg_isready -U openvrf -d openvrf"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
     env:
       DEPLOYER_PRIVATE_KEY: ${{ secrets.KINDO_TESTNET_OWNER_PRIVATE_KEY }}
       PRIMARY_RELAYER_PRIVATE_KEY: ${{ secrets.KINDO_TESTNET_PRIMARY_RELAYER_PRIVATE_KEY }}
@@ -25,6 +37,7 @@ jobs:
       ROUTER_ADDRESS: "0xe68c6bd57bc2497eccebb5bae5ae8e618b3daaaa"
       CONSUMER_ADDRESS: "0x3fB6857fa5fFE0d507e0310B08064B6fC7AB0334"
       POSTGRES_PASSWORD: "openvrf-ci-password"
+      DATABASE_URL: "postgresql://openvrf:openvrf-ci-password@127.0.0.1:5432/openvrf"
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -36,11 +49,8 @@ jobs:
         run: test "$(cast chain-id --rpc-url "$ROBINHOOD_TESTNET_RPC_URL")" = "46630"
       - run: npm ci --ignore-scripts
       - run: npx hardhat compile
-      - name: Start OpenVRF database
-        run: |
-          mkdir -p openvrf/secrets
-          : > openvrf/secrets/relayer-key
-          docker compose -f openvrf/compose.yaml up -d postgres
+      - name: Prepare OpenVRF runtime
+        run: mkdir -p openvrf/secrets
       - name: Install relayer dependencies
         working-directory: openvrf
         run: npm ci --ignore-scripts
@@ -51,7 +61,7 @@ jobs:
         run: |
           mkdir -p openvrf/secrets
           printf '%s' "$PRIMARY_RELAYER_PRIVATE_KEY" > openvrf/secrets/primary-key
-          export RPC_URL="$ROBINHOOD_TESTNET_RPC_URL" WS_URL="wss://robinhood-testnet.g.alchemy.com/v2/$KINDO_TESTNET_ALCHEMY_API_KEY" CHAIN_ID=46630 ROUTER_ADDRESS="$ROUTER_ADDRESS" RELAY_ALL_CONSUMERS=true RELAYER_ADDRESSES="0x1BB3884AE2C2a27dEc3aB537F93cFE4961344401,0xE50Ca16E7f0bdd7a7F47d1B1A8AD0c9d63037305" RELAYER_KEY_FILE="$GITHUB_WORKSPACE/openvrf/secrets/primary-key" DATABASE_URL="postgresql://openvrf:$POSTGRES_PASSWORD@127.0.0.1:5432/openvrf" START_BLOCK=0 RELAYER_FAILOVER_SECONDS=60 RELAYER_LEASE_SECONDS=120 RECEIPT_TIMEOUT_SECONDS=30
+          export RPC_URL="$ROBINHOOD_TESTNET_RPC_URL" WS_URL="wss://robinhood-testnet.g.alchemy.com/v2/$KINDO_TESTNET_ALCHEMY_API_KEY" CHAIN_ID=46630 ROUTER_ADDRESS="$ROUTER_ADDRESS" RELAY_ALL_CONSUMERS=true RELAYER_ADDRESSES="0x1BB3884AE2C2a27dEc3aB537F93cFE4961344401,0xE50Ca16E7f0bdd7a7F47d1B1A8AD0c9d63037305" RELAYER_KEY_FILE="$GITHUB_WORKSPACE/openvrf/secrets/primary-key" DATABASE_URL="$DATABASE_URL" START_BLOCK=0 RELAYER_FAILOVER_SECONDS=60 RELAYER_LEASE_SECONDS=120 RECEIPT_TIMEOUT_SECONDS=30
           (cd openvrf && node relayer/main.mjs > ../primary-relayer.log 2>&1) & echo $! > primary.pid
           sleep 8
           kill "$(cat primary.pid)" || true
@@ -60,7 +70,7 @@ jobs:
         shell: bash
         run: |
           printf '%s' "$BACKUP_RELAYER_PRIVATE_KEY" > openvrf/secrets/backup-key
-          export RPC_URL="$ROBINHOOD_TESTNET_RPC_URL" WS_URL="wss://robinhood-testnet.g.alchemy.com/v2/$KINDO_TESTNET_ALCHEMY_API_KEY" CHAIN_ID=46630 ROUTER_ADDRESS="$ROUTER_ADDRESS" RELAY_ALL_CONSUMERS=true RELAYER_ADDRESSES="0x1BB3884AE2C2a27dEc3aB537F93cFE4961344401,0xE50Ca16E7f0bdd7a7F47d1B1A8AD0c9d63037305" RELAYER_KEY_FILE="$GITHUB_WORKSPACE/openvrf/secrets/backup-key" DATABASE_URL="postgresql://openvrf:$POSTGRES_PASSWORD@127.0.0.1:5432/openvrf" START_BLOCK=0 RELAYER_FAILOVER_SECONDS=60 RELAYER_LEASE_SECONDS=120 RECEIPT_TIMEOUT_SECONDS=30
+          export RPC_URL="$ROBINHOOD_TESTNET_RPC_URL" WS_URL="wss://robinhood-testnet.g.alchemy.com/v2/$KINDO_TESTNET_ALCHEMY_API_KEY" CHAIN_ID=46630 ROUTER_ADDRESS="$ROUTER_ADDRESS" RELAY_ALL_CONSUMERS=true RELAYER_ADDRESSES="0x1BB3884AE2C2a27dEc3aB537F93cFE4961344401,0xE50Ca16E7f0bdd7a7F47d1B1A8AD0c9d63037305" RELAYER_KEY_FILE="$GITHUB_WORKSPACE/openvrf/secrets/backup-key" DATABASE_URL="$DATABASE_URL" START_BLOCK=0 RELAYER_FAILOVER_SECONDS=60 RELAYER_LEASE_SECONDS=120 RECEIPT_TIMEOUT_SECONDS=30
           (cd openvrf && node relayer/main.mjs > ../backup-relayer.log 2>&1) & echo $! > backup.pid
           sleep 120
       - name: Verify on-chain result and same randomness
