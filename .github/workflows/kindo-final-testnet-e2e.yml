@@ -1,0 +1,89 @@
+name: KINDO Final Robinhood Testnet E2E validation (manual)
+
+on:
+  workflow_dispatch:
+    inputs:
+      confirmation:
+        description: "Type RUN_KINDO_FINAL_TESTNET_E2E"
+        required: true
+        type: string
+
+permissions:
+  contents: read
+
+jobs:
+  e2e:
+    if: inputs.confirmation == 'RUN_KINDO_FINAL_TESTNET_E2E'
+    runs-on: ubuntu-latest
+    environment: kindo-testnet-deploy
+    env:
+      DEPLOYER_PRIVATE_KEY: ${{ secrets.KINDO_TESTNET_OWNER_PRIVATE_KEY }}
+      PRIMARY_RELAYER_PRIVATE_KEY: ${{ secrets.KINDO_TESTNET_PRIMARY_RELAYER_PRIVATE_KEY }}
+      BACKUP_RELAYER_PRIVATE_KEY: ${{ secrets.KINDO_TESTNET_BACKUP_RELAYER_PRIVATE_KEY }}
+      KINDO_TESTNET_ALCHEMY_API_KEY: ${{ secrets.KINDO_TESTNET_ALCHEMY_API_KEY }}
+      ROBINHOOD_TESTNET_RPC_URL: "https://rpc.testnet.chain.robinhood.com"
+      ROUTER_ADDRESS: "0xe68c6bd57bc2497eccebb5bae5ae8e618b3daaaa"
+      CONSUMER_ADDRESS: "0x3fB6857fa5fFE0d507e0310B08064B6fC7AB0334"
+      CHAIN_ID: "46630"
+      POSTGRES_PASSWORD: "openvrf-ci-password"
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - uses: foundry-rs/foundry-toolchain@v1
+      - name: Verify testnet only
+        run: test "$(cast chain-id --rpc-url "$ROBINHOOD_TESTNET_RPC_URL")" = "46630"
+      - run: npm ci --ignore-scripts
+      - run: npx hardhat compile
+      - name: Start durable OpenVRF database
+        run: docker compose -f openvrf/compose.yaml up -d postgres
+      - name: Install OpenVRF relayer dependencies
+        working-directory: openvrf
+        run: npm ci --ignore-scripts
+      - name: Request randomness and record request transaction
+        run: npx hardhat run scripts/nft/request-test-consumer.ts --network robinhoodTestnet | Tee-Object e2e-request.json
+      - name: Start primary relayer then stop it before fulfillment
+        shell: bash
+        run: |
+          mkdir -p openvrf/secrets
+          printf '%s' "$PRIMARY_RELAYER_PRIVATE_KEY" > openvrf/secrets/primary-key
+          export RPC_URL="$ROBINHOOD_TESTNET_RPC_URL"
+          export WS_URL="wss://robinhood-testnet.g.alchemy.com/v2/$KINDO_TESTNET_ALCHEMY_API_KEY"
+          export CHAIN_ID=46630 ROUTER_ADDRESS="$ROUTER_ADDRESS" RELAY_ALL_CONSUMERS=true
+          export RELAYER_ADDRESSES="0x1BB3884AE2C2a27dEc3aB537F93cFE4961344401,0xE50Ca16E7f0bdd7a7F47d1B1A8AD0c9d63037305"
+          export RELAYER_KEY_FILE="$GITHUB_WORKSPACE/openvrf/secrets/primary-key"
+          export DATABASE_URL="postgresql://openvrf:$POSTGRES_PASSWORD@127.0.0.1:5432/openvrf"
+          export START_BLOCK=0 RELAYER_FAILOVER_SECONDS=60 RELAYER_LEASE_SECONDS=120 RECEIPT_TIMEOUT_SECONDS=30
+          (cd openvrf && node relayer/main.mjs > ../primary-relayer.log 2>&1) & echo $! > primary.pid
+          sleep 8
+          kill "$(cat primary.pid)" || true
+          sleep 65
+      - name: Start backup relayer and wait for same request fulfillment
+        shell: bash
+        run: |
+          printf '%s' "$BACKUP_RELAYER_PRIVATE_KEY" > openvrf/secrets/backup-key
+          export RPC_URL="$ROBINHOOD_TESTNET_RPC_URL"
+          export WS_URL="wss://robinhood-testnet.g.alchemy.com/v2/$KINDO_TESTNET_ALCHEMY_API_KEY"
+          export CHAIN_ID=46630 ROUTER_ADDRESS="$ROUTER_ADDRESS" RELAY_ALL_CONSUMERS=true
+          export RELAYER_ADDRESSES="0x1BB3884AE2C2a27dEc3aB537F93cFE4961344401,0xE50Ca16E7f0bdd7a7F47d1B1A8AD0c9d63037305"
+          export RELAYER_KEY_FILE="$GITHUB_WORKSPACE/openvrf/secrets/backup-key"
+          export DATABASE_URL="postgresql://openvrf:$POSTGRES_PASSWORD@127.0.0.1:5432/openvrf"
+          export START_BLOCK=0 RELAYER_FAILOVER_SECONDS=60 RELAYER_LEASE_SECONDS=120 RECEIPT_TIMEOUT_SECONDS=30
+          (cd openvrf && node relayer/main.mjs > ../backup-relayer.log 2>&1) & echo $! > backup.pid
+          timeout 300 bash -c 'until grep -q '"'"'backup fulfillment timeout'"'"' /dev/null 2>/dev/null; do sleep 1; done' || true
+      - name: Verify fulfilled result and invariants
+        run: npx hardhat run scripts/nft/request-test-consumer.ts --network robinhoodTestnet
+      - name: Run relevant tests
+        run: npx hardhat test test/KindoOpenVRFAdapter.ts test/KindoOpenVRFRelayerFailover.ts
+      - name: Save E2E evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: kindo-testnet-e2e-evidence
+          path: |
+            e2e-request.json
+            primary-relayer.log
+            backup-relayer.log
+          retention-days: 14
