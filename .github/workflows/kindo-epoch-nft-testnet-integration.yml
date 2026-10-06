@@ -87,7 +87,7 @@ jobs:
           node -e 'const a=process.argv[1]; if (!/^0x[0-9a-fA-F]{40}$/.test(a)) process.exit(2)' "$address"
           echo "KINDO_EPOCH_NFT_ADDRESS=$address" >> "$GITHUB_ENV"
           printf '%s\n' "{\"deployedAddress\":\"$address\",\"source\":\"existing-input\"}" > epoch-deployment.log
-      - name: Start OpenVRF relayers
+      - name: Run KindoEpochOpenVRFNFT integration
         shell: bash
         run: |
           mkdir -p openvrf-upstream/secrets
@@ -95,11 +95,13 @@ jobs:
           printf '%s' "$BACKUP_RELAYER_PRIVATE_KEY" > openvrf-upstream/secrets/backup-key
           START_BLOCK=$(($(cast block-number --rpc-url "$ROBINHOOD_TESTNET_RPC_URL") - 10000))
           export RPC_URL="$ROBINHOOD_TESTNET_RPC_URL" WS_URL="wss://robinhood-testnet.g.alchemy.com/v2/$KINDO_TESTNET_ALCHEMY_API_KEY" CHAIN_ID=46630 ROUTER_ADDRESS="$ROUTER_ADDRESS" RELAY_ALL_CONSUMERS=true RELAYER_ADDRESSES="0x1BB3884AE2C2a27dEc3aB537F93cFE4961344401,0xE50Ca16E7f0bdd7a7F47d1B1A8AD0c9d63037305" DATABASE_URL="$DATABASE_URL" START_BLOCK="$START_BLOCK" RELAYER_FAILOVER_SECONDS=60 RELAYER_LEASE_SECONDS=120 RECEIPT_TIMEOUT_SECONDS=30 MAX_GAS_PRICE_GWEI=1000
-          (RELAYER_KEY_FILE="$GITHUB_WORKSPACE/openvrf-upstream/secrets/primary-key" cd openvrf-upstream && node relayer/main.mjs > ../primary-relayer.log 2>&1) &
-          (RELAYER_KEY_FILE="$GITHUB_WORKSPACE/openvrf-upstream/secrets/backup-key" cd openvrf-upstream && node relayer/main.mjs > ../backup-relayer.log 2>&1) &
+          (export RELAYER_KEY_FILE="$GITHUB_WORKSPACE/openvrf-upstream/secrets/primary-key"; cd openvrf-upstream; node relayer/main.mjs > ../primary-relayer.log 2>&1) &
+          primary_pid=$!
+          (export RELAYER_KEY_FILE="$GITHUB_WORKSPACE/openvrf-upstream/secrets/backup-key"; cd openvrf-upstream; node relayer/main.mjs > ../backup-relayer.log 2>&1) &
+          backup_pid=$!
+          trap 'kill "$primary_pid" "$backup_pid" 2>/dev/null || true' EXIT
           sleep 8
-      - name: Run KindoEpochOpenVRFNFT integration
-        run: npx hardhat run scripts/nft/run-kindo-epoch-testnet.ts --network robinhoodTestnet
+          npx hardhat run scripts/nft/run-kindo-epoch-testnet.ts --network robinhoodTestnet
       - name: Upload non-secret evidence
         if: always()
         uses: actions/upload-artifact@v4
