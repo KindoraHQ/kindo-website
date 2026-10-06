@@ -32,15 +32,30 @@
   </section>
   <section class="section wrap" aria-labelledby="dashboard-title">
     <div class="section-head"><div><h2 id="dashboard-title">Your future staking dashboard</h2><p class="muted preview-note">A preview of what’s planned. No wallet is connected and no rewards are accruing on this page.</p></div><span class="pill">COMING SOON</span></div>
-    <div class="layout">
-      <div class="card">
-        <div class="row"><div><small class="muted">WALLET STATUS</small><h3>Connection opens at launch</h3></div><span class="pill">NOT LIVE</span></div>
-        <div class="reward-grid"><div class="mini"><small class="muted">Your NFTs</small><strong>Available at launch</strong></div><div class="mini"><small class="muted">Your rewards</small><strong>Available at launch</strong></div></div>
-        <div class="note">Staking, unstaking and reward claims are not available yet. Final eligibility, reward rules and launch instructions will be published before activation.</div>
-        <div style="margin-top:20px"><button class="btn disabled" type="button" disabled>Staking coming soon</button></div>
+    <div class="staking-preview" aria-label="Preview of the staking dashboard">
+      <div class="card wallet-card">
+        <div class="row"><div><small class="muted">WALLET STATUS</small><h3>Connect your wallet</h3></div><span class="pill">PREVIEW</span></div>
+        <p class="muted">Choose an NFT from your wallet, then stake it to start earning KINDO.</p>
+        <button class="btn primary preview-button" type="button" disabled>Connect wallet</button>
       </div>
-      <div class="card"><h3>Before staking opens</h3><ul class="launch-list"><li>Official eligibility and reward rules will be announced.</li><li>Wallet connection and staking functionality will be tested.</li><li>Launch instructions will be shared through KINDO’s official channels.</li></ul><div class="note">There are no published reward rates or confirmed launch dates yet.</div></div>
+      <div class="reward-grid preview-stats">
+        <div class="mini"><small class="muted">NFTs staked</small><strong>0 / 555</strong></div>
+        <div class="mini"><small class="muted">Your rewards</small><strong>0 KINDO</strong></div>
+        <div class="mini"><small class="muted">Reward rate</small><strong>To be announced</strong></div>
+      </div>
+      <div class="card nft-stake-card">
+        <div class="row"><div><small class="muted">STAKE AN NFT</small><h3>Choose your KINDO</h3></div><span class="status-available">Available</span></div>
+        <label class="nft-number-label" for="nftNumber">NFT number</label>
+        <div class="nft-number-row"><input id="nftNumber" class="nft-number-input" type="number" min="1" max="553" placeholder="e.g. 204" disabled><button class="btn btn-details preview-button" type="button" disabled>View NFT</button></div>
+        <div class="nft-preview-tile"><div class="nft-preview-art">K</div><div><span class="pill">NFT PREVIEW</span><h4>KINDO #204</h4><p class="muted">Ready to stake at launch</p></div><button class="btn primary preview-button" type="button" disabled>Stake NFT</button></div>
+      </div>
+      <div class="card staked-card">
+        <div class="row"><div><small class="muted">YOUR STAKED NFTS</small><h3>Nothing staked yet</h3></div><span class="pill">0 ACTIVE</span></div>
+        <div class="empty-state"><span>◎</span><p>Your staked NFTs and live KINDO earnings will appear here.</p></div>
+        <div class="reward-actions"><button class="btn dark preview-button" type="button" disabled>Claim rewards</button><button class="btn dark preview-button" type="button" disabled>Unstake</button></div>
+      </div>
     </div>
+    <div class="note preview-disclaimer">Preview only — wallet connection, staking, claims and rewards are not live yet. Final rates and eligibility will be announced before launch.</div>
   </section>
   <section class="section wrap" aria-labelledby="collection-title">
     <div class="section-head"><div><h2 id="collection-title">Meet the collection</h2><p class="muted preview-note">Artwork previews from Kindo’s journey. These are not wallet holdings or staking eligibility claims.</p></div><a class="btn dark" href="nft.html">View collection ↗</a></div>

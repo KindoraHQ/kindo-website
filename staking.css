@@ -55,6 +55,24 @@ h1{font-size:clamp(40px,6vw,72px);line-height:.98;margin:18px 0;letter-spacing:-
 .mini{background:rgba(255,255,255,.045);border:1px solid rgba(255,255,255,.09);border-radius:16px;padding:16px}
 .mini strong{font-size:22px}
 .note{margin-top:14px;padding:14px 16px;border-radius:14px;background:linear-gradient(90deg,rgba(139,92,246,.10),rgba(49,216,255,.07));border:1px solid rgba(255,255,255,.10);color:#d5d8e8;font-size:14px;line-height:1.6}
+.staking-preview{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.staking-preview .wallet-card,.staking-preview .nft-stake-card,.staking-preview .staked-card{grid-column:span 1}
+.preview-stats{grid-column:span 1;display:grid;grid-template-columns:1fr;gap:12px;margin:0}
+.preview-button{opacity:.72}
+.wallet-card p{max-width:510px;margin:12px 0 18px}
+.nft-number-label{display:block;margin-top:18px;margin-bottom:7px;color:#d5d8e8;font-size:13px;font-weight:700}
+.nft-number-row{display:flex;gap:10px}
+.nft-number-input{width:100%;border:1px solid rgba(255,255,255,.14);border-radius:12px;background:#0b0d18;color:var(--text);padding:12px 14px;font:inherit}
+.nft-preview-tile{display:grid;grid-template-columns:58px 1fr auto;align-items:center;gap:14px;margin-top:18px;padding:12px;border:1px solid rgba(255,255,255,.1);border-radius:16px;background:rgba(255,255,255,.035)}
+.nft-preview-art{width:58px;height:58px;display:grid;place-items:center;border-radius:13px;background:linear-gradient(135deg,var(--purple),var(--cyan));font-size:28px;font-weight:950}
+.nft-preview-tile h4{margin:6px 0 1px;font-size:16px}
+.nft-preview-tile p{margin:0;font-size:12px}
+.status-available{font-size:12px;color:var(--green);font-weight:800}
+.empty-state{display:flex;align-items:center;gap:12px;margin-top:18px;padding:16px;border:1px dashed rgba(255,255,255,.16);border-radius:16px;color:var(--muted)}
+.empty-state span{font-size:28px;color:var(--cyan)}
+.empty-state p{margin:0;font-size:14px}
+.reward-actions{display:flex;gap:10px;margin-top:16px}
+.preview-disclaimer{margin-top:18px;text-align:center}
 table{width:100%;border-collapse:collapse}
 th,td{padding:11px 8px;border-bottom:1px solid #222a37;text-align:left}
 th:last-child,td:last-child{text-align:right}
@@ -66,8 +84,8 @@ th{font-size:12px;color:#7f8ba0;text-transform:uppercase}
 .nft h3{margin:12px 0 4px}
 .nft p{margin:0;color:var(--muted)}
 footer{text-align:center;color:#7d8798;padding:42px 20px 56px;font-size:13px}
-@media(max-width:900px){.grid4{grid-template-columns:repeat(2,1fr)}.layout{grid-template-columns:1fr}.nft-grid{grid-template-columns:repeat(2,1fr)}}
-@media(max-width:560px){.grid4,.nft-grid{grid-template-columns:1fr}.reward-grid{grid-template-columns:1fr}}
+@media(max-width:900px){.grid4{grid-template-columns:repeat(2,1fr)}.layout,.staking-preview{grid-template-columns:1fr}.nft-grid{grid-template-columns:repeat(2,1fr)}.preview-stats{grid-template-columns:repeat(3,1fr)}}
+@media(max-width:560px){.grid4,.nft-grid,.preview-stats{grid-template-columns:1fr}.reward-grid{grid-template-columns:1fr}.nft-preview-tile{grid-template-columns:52px 1fr}.nft-preview-tile .preview-button{grid-column:1 / -1;width:100%}.nft-number-row{flex-direction:column}}
 
 /* --- Typography polish v6 --- */
 body{
