@@ -10,6 +10,16 @@ if ((await ethers.provider.getNetwork()).chainId !== CHAIN_ID) throw new Error("
 const [signer] = await ethers.getSigners();
 if (!signer) throw new Error("No testnet signer configured");
 const nft = await ethers.getContractAt("KindoEpochOpenVRFNFT", address, signer);
+const router = await ethers.getContractAt([
+  "function authorizedConsumers(address) view returns (bool)",
+  "function setConsumerAuthorization(address,bool) external",
+], await nft.router(), signer);
+if (!(await router.authorizedConsumers(address))) {
+  const authorizationTx = await router.setConsumerAuthorization(address, true);
+  await authorizationTx.wait();
+  if (!(await router.authorizedConsumers(address))) throw new Error("NFT consumer authorization failed");
+  console.log(JSON.stringify({ authorizedConsumer: address, authorizationTx: authorizationTx.hash }));
+}
 const latest = async () => (await ethers.provider.getBlock("latest"))!.timestamp;
 const waitUntil = async (predicate: () => Promise<boolean>, label: string) => {
   const end = Date.now() + MAX_WAIT_MS;
