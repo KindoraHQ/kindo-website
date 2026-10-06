@@ -22,6 +22,20 @@ const send = async (label: string, estimate: () => Promise<bigint>, submit: () =
   console.log(JSON.stringify({ plannedWrite: label, estimatedGas: gas.toString() }));
   const sent = await submit(); await sent.wait(); return sent.hash;
 };
+const sendWhenReady = async (label: string, estimate: () => Promise<bigint>, submit: () => Promise<any>) => {
+  const end = Date.now() + MAX_WAIT_MS;
+  let gas: bigint;
+  while (true) {
+    try { gas = await estimate(); break; }
+    catch (error) {
+      if (Date.now() > end) throw error;
+      console.log(JSON.stringify({ waiting: label, reason: "chain state not yet ready" }));
+      await sleep(5000);
+    }
+  }
+  console.log(JSON.stringify({ plannedWrite: label, estimatedGas: gas.toString() }));
+  const sent = await submit(); await sent.wait(); return sent.hash;
+};
 
 // Epoch 0 must remain empty. Read the live chain timestamp until epoch 1 is active.
 await waitUntil(async () => { try { return await epoch() >= 1; } catch { return false; } }, "epoch 1 start");
@@ -29,15 +43,15 @@ const minted = Number(await nft.publicMinted());
 if (minted === 0) {
   const e = await epoch();
   await send(`mint 1 in epoch ${e}`, () => nft.mint.estimateGas(1, { value: 0 }), () => nft.mint(1, { value: 0 }));
-  while (Number(await nft.nextEpochToFinalize()) < e) {
-    const next = Number(await nft.nextEpochToFinalize());
-    const state = await ep(next);
-    if (Number(state.count) !== 0) throw new Error(`Unexpected non-empty earlier epoch ${next}`);
-    if ((await latest()) < Number(await nft.epochEnd(next))) { await sleep(5000); continue; }
-    await send(`skip empty epoch ${next}`, () => nft.skipEmptyEpoch.estimateGas(next), () => nft.skipEmptyEpoch(next));
-  }
 }
 const firstEpoch = Number(await nft.tokenEpoch(1));
+while (Number(await nft.nextEpochToFinalize()) < firstEpoch) {
+  const next = Number(await nft.nextEpochToFinalize());
+  const state = await ep(next);
+  if (Number(state.count) !== 0) throw new Error(`Unexpected non-empty earlier epoch ${next}`);
+  if ((await latest()) < Number(await nft.epochEnd(next))) { await sleep(5000); continue; }
+  await sendWhenReady(`skip empty epoch ${next}`, () => nft.skipEmptyEpoch.estimateGas(next), () => nft.skipEmptyEpoch(next));
+}
 if (!((await latest()) >= Number(await nft.epochEnd(firstEpoch)))) await waitUntil(async () => (await latest()) >= Number(await nft.epochEnd(firstEpoch)), `epoch ${firstEpoch} end`);
 let state = await ep(firstEpoch);
 if (!state.requested) await send(`request randomness for epoch ${firstEpoch}`, () => nft.requestEpochRandomness.estimateGas(firstEpoch, { value: 0 }), () => nft.requestEpochRandomness(firstEpoch, { value: 0 }));
