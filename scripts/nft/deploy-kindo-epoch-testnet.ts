@@ -16,12 +16,14 @@ const deployer = await signer.getAddress();
 if (deployer.toLowerCase() !== OWNER.toLowerCase()) throw new Error("Configured signer is not the testnet owner");
 
 const now = (await ethers.provider.getBlock("latest"))?.timestamp ?? Math.floor(Date.now() / 1000);
+const router = await ethers.getContractAt(["function requestFee() view returns (uint256)"], ROUTER);
+const requestFee = await router.requestFee();
 const start = BigInt(now) + 120n;
 const factory = await ethers.getContractFactory("KindoEpochOpenVRFNFT", signer);
 const config = {
   owner: OWNER, founder: FOUNDER, treasury: TREASURY, router: ROUTER,
   price: 0, start, epochDuration: 60, walletLimit: 10, transactionLimit: 3,
-  callbackGasLimit: 100000, requestFee: 0,
+  callbackGasLimit: 100000, requestFee,
   placeholder: "TEST_ONLY_PLACEHOLDER/", finalBase: "TEST_ONLY_FINAL_BASE/",
   allocationRoot: ROOT,
 };

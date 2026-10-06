@@ -54,7 +54,8 @@ while (Number(await nft.nextEpochToFinalize()) < firstEpoch) {
 }
 if (!((await latest()) >= Number(await nft.epochEnd(firstEpoch)))) await waitUntil(async () => (await latest()) >= Number(await nft.epochEnd(firstEpoch)), `epoch ${firstEpoch} end`);
 let state = await ep(firstEpoch);
-if (!state.requested) await send(`request randomness for epoch ${firstEpoch}`, () => nft.requestEpochRandomness.estimateGas(firstEpoch, { value: 0 }), () => nft.requestEpochRandomness(firstEpoch, { value: 0 }));
+const requestFee = await nft.requestFee();
+if (!state.requested) await send(`request randomness for epoch ${firstEpoch}`, () => nft.requestEpochRandomness.estimateGas(firstEpoch, { value: requestFee }), () => nft.requestEpochRandomness(firstEpoch, { value: requestFee }));
 await waitUntil(async () => (await ep(firstEpoch)).seedReceived, `randomness for epoch ${firstEpoch}`);
 state = await ep(firstEpoch);
 if (!state.finalized) await send(`finalize epoch ${firstEpoch}`, () => nft.finalize.estimateGas(firstEpoch), () => nft.finalize(firstEpoch));
@@ -66,7 +67,7 @@ await waitUntil(async () => await epoch() >= secondEpoch, `epoch ${secondEpoch}`
 if (Number(await nft.publicMinted()) === 1) await send(`mint 2 in epoch ${secondEpoch}`, () => nft.mint.estimateGas(2, { value: 0 }), () => nft.mint(2, { value: 0 }));
 if ((await latest()) < Number(await nft.epochEnd(secondEpoch))) await waitUntil(async () => (await latest()) >= Number(await nft.epochEnd(secondEpoch)), `epoch ${secondEpoch} end`);
 state = await ep(secondEpoch);
-if (!state.requested) await send(`request randomness for epoch ${secondEpoch}`, () => nft.requestEpochRandomness.estimateGas(secondEpoch, { value: 0 }), () => nft.requestEpochRandomness(secondEpoch, { value: 0 }));
+if (!state.requested) await send(`request randomness for epoch ${secondEpoch}`, () => nft.requestEpochRandomness.estimateGas(secondEpoch, { value: requestFee }), () => nft.requestEpochRandomness(secondEpoch, { value: requestFee }));
 await waitUntil(async () => (await ep(secondEpoch)).seedReceived, `randomness for epoch ${secondEpoch}`);
 state = await ep(secondEpoch);
 if (!state.finalized) await send(`finalize epoch ${secondEpoch}`, () => nft.finalize.estimateGas(secondEpoch), () => nft.finalize(secondEpoch));
