@@ -27,7 +27,7 @@ const config = {
   placeholder: "TEST_ONLY_PLACEHOLDER/", finalBase: "TEST_ONLY_FINAL_BASE/",
   allocationRoot: ROOT,
 };
-console.log(JSON.stringify({ network: "Robinhood Chain Testnet", chainId: chainId.toString(), deployer, balance: (await ethers.provider.getBalance(deployer)).toString(), config: { ...config, start: start.toString() } }));
+console.log(JSON.stringify({ network: "Robinhood Chain Testnet", chainId: chainId.toString(), deployer, balance: (await ethers.provider.getBalance(deployer)).toString(), config: { ...config, start: start.toString(), requestFee: requestFee.toString() } }));
 const contract = await factory.deploy(config);
 const deploymentTx = contract.deploymentTransaction();
 await contract.waitForDeployment();
