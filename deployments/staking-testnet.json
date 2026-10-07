@@ -1,0 +1,15 @@
+{
+  "network": "robinhoodTestnet",
+  "chainId": 46630,
+  "deployer": "0xDCf356f2C687e028FAC39De57dfE209258F9Fa3F",
+  "staking": "0x9D985701Fa20Ca95174D3ccF3e862DbdfAF26125",
+  "nft": "0xd6b0FBF43df68d43845bDDc6661B56ab1c17163E",
+  "rewardToken": "0xD353660E2cecaD218dCFE33E002085e1f64dec5f",
+  "rewardRatePerDay": "100000000000000000000",
+  "rewardCap": "200000000000000000000000000",
+  "deployedAt": "2026-10-07",
+  "fundedAmount": "100000000000000000000000",
+  "fundingTx": "0x95c52c1a3d8a8fba9d8845934919fc18266f4d11f3240f2280fdda2b39f89ef3",
+  "stakedTokenId": 1,
+  "stakeTx": "0xa0b1fce7b65e943c40b914a73778f138b4ab2b1b28aaf4e2f1d8ceb133fa58d5"
+}
