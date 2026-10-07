@@ -12,6 +12,13 @@
   const errorText = e => e?.shortMessage || e?.reason || e?.info?.error?.message || e?.message || 'Transaction failed.';
   const busy = (value, label = 'Stake NFT') => { const button = $('stakeButton'); if (button) { button.disabled = value; button.textContent = value ? 'Waiting for wallet…' : label; } };
   const format = value => Number(value).toLocaleString(undefined, {maximumFractionDigits: 4});
+  async function activeIdsFor(address) {
+    const staked = await staking.queryFilter(staking.filters.Staked(address), 0, 'latest');
+    const unstaked = await staking.queryFilter(staking.filters.Unstaked(address), 0, 'latest');
+    const active = new Set(staked.map(event => String(event.args.tokenId)));
+    for (const event of unstaked) active.delete(String(event.args.tokenId));
+    return [...active].map(Number);
+  }
   async function connect() {
     if (!window.ethereum || !window.ethers) return setStatus('Install an EVM wallet to use the testnet preview.');
     provider = new window.ethers.BrowserProvider(window.ethereum);
@@ -41,6 +48,7 @@
   async function syncAccount(accounts) {
     if (!accounts?.length || !provider) return;
     account = accounts[0];
+    selectedId = undefined;
     signer = await provider.getSigner(account);
     staking = new window.ethers.Contract(STAKING, stakingAbi, signer);
     nft = new window.ethers.Contract(NFT, nftAbi, signer);
@@ -53,13 +61,11 @@
     $('rateValue').textContent = `${format(ethers.formatUnits(await staking.rewardRatePerDay(),18))} KINDO/day`;
     $('stakedCount').textContent = `${await staking.totalStaked()} / 555`;
     if (account && $('yourStakedCount')) {
-      const staked = await staking.queryFilter(staking.filters.Staked(account), 0, 'latest');
-      const unstaked = await staking.queryFilter(staking.filters.Unstaked(account), 0, 'latest');
-      const active = new Set(staked.map(event => String(event.args.tokenId)));
-      for (const event of unstaked) active.delete(String(event.args.tokenId));
-      $('yourStakedCount').textContent = String(active.size);
+      const activeIds = await activeIdsFor(account);
+      $('yourStakedCount').textContent = String(activeIds.length);
+      if (!selectedId || !activeIds.includes(selectedId)) selectedId = activeIds[0];
     }
-    if (selectedId) $('pendingValue').textContent = `${format(ethers.formatUnits(await staking.pendingReward(selectedId),18))} KINDO`;
+    $('pendingValue').textContent = selectedId ? `${format(ethers.formatUnits(await staking.pendingReward(selectedId),18))} KINDO` : '0 KINDO';
   }
   async function stake() {
     const id = Number($('nftNumber').value);
