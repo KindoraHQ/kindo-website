@@ -11,5 +11,8 @@
   "fundedAmount": "100000000000000000000000",
   "fundingTx": "0x95c52c1a3d8a8fba9d8845934919fc18266f4d11f3240f2280fdda2b39f89ef3",
   "stakedTokenId": 1,
-  "stakeTx": "0xa0b1fce7b65e943c40b914a73778f138b4ab2b1b28aaf4e2f1d8ceb133fa58d5"
+  "stakeTx": "0xa0b1fce7b65e943c40b914a73778f138b4ab2b1b28aaf4e2f1d8ceb133fa58d5",
+  "claimTx": "0x56e2de71578d0c6891dba404ba920c0176dc8b13f0600d1ef7d89db6e7705c86",
+  "unstakeTx": "0x212dfff4c9ffdbe99cd565394b3d4ba9ad31f260c73f2c4a6021d4e6af352820",
+  "claimedAmount": "199074074074074074"
 }
