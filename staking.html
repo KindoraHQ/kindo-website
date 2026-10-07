@@ -12,7 +12,8 @@
 <script src="risk-gate.js"></script>
 <link rel="stylesheet" href="navigation.css">
 <script defer src="navigation.js"></script>
-<link rel="stylesheet" href="nft-footer.css">
+  <link rel="stylesheet" href="nft-footer.css">
+<script src="https://cdn.jsdelivr.net/npm/ethers@6.13.5/dist/ethers.umd.min.js"></script>
 </head>
 <body>
 <header class="kindo-header"><a class="kindo-brand" href="index.html" aria-label="KINDO home"><img src="assets/kindo-logo.png" alt=""><span>KINDO</span></a><button class="kindo-menu-toggle" type="button" aria-expanded="false" aria-controls="kindo-navigation" aria-label="Open navigation menu">☰</button><nav id="kindo-navigation" class="kindo-navigation" aria-label="Primary navigation"><details class="kindo-nav-group"><summary>About<span aria-hidden="true">⌄</span></summary><div class="kindo-dropdown"><a href="index.html#story">Story</a><a href="index.html#why">Why KINDO</a><a href="index.html#roadmap">Roadmap</a><a href="index.html#faq">FAQ</a></div></details><details class="kindo-nav-group"><summary>Token<span aria-hidden="true">⌄</span></summary><div class="kindo-dropdown"><a href="index.html#tokenomics">Tokenomics</a><a href="index.html#transparency">Transparency</a></div></details><details class="kindo-nav-group"><summary>NFTs<span aria-hidden="true">⌄</span></summary><div class="kindo-dropdown"><a href="nft.html">NFT Collection</a><a href="staking.html" aria-current="page">NFT Staking<small>Coming Soon</small></a></div></details><details class="kindo-nav-group"><summary>Community<span aria-hidden="true">⌄</span></summary><div class="kindo-dropdown"><a href="index.html#community">Join the Community</a><a href="community-kit.html">Community Kit</a></div></details></nav><a class="kindo-header-cta" href="index.html#how-to-buy">How to Buy</a></header>
@@ -21,12 +22,12 @@
     <span class="eyebrow">KINDO NFT STAKING</span>
     <h1 id="staking-title">A new chapter.<br><span>Coming soon.</span></h1>
     <p>We’re building a dedicated staking experience for the KINDO collection. The launch date, eligibility and reward details will be announced when they’re ready.</p>
-    <span class="launch-status">In development · Staking is not live</span>
+    <span class="launch-status">TESTNET PREVIEW · No mainnet value</span>
     <div class="actions"><a class="btn primary" href="nft.html">Explore the collection ↗</a><a class="btn dark" href="index.html#community">Join the community</a></div>
     <div class="grid4" aria-label="Launch status">
       <div class="stat"><small>Staking</small><strong>Coming soon</strong><span class="muted">Not yet available</span></div>
-      <div class="stat"><small>Wallet connection</small><strong>Not enabled</strong><span class="muted">No connection needed</span></div>
-      <div class="stat"><small>Reward rates</small><strong>To be announced</strong><span class="muted">Final rules pending</span></div>
+      <div class="stat"><small>Wallet connection</small><strong>Testnet only</strong><span class="muted">Robinhood Chain Testnet</span></div>
+      <div class="stat"><small>Reward rates</small><strong>100 KINDO/day</strong><span class="muted">Testnet configuration</span></div>
       <div class="stat"><small>Launch date</small><strong>Stay tuned</strong><span class="muted">Updates through official channels</span></div>
     </div>
   </section>
@@ -34,28 +35,27 @@
     <div class="section-head"><div><h2 id="dashboard-title">Your future staking dashboard</h2><p class="muted preview-note">A preview of what’s planned. No wallet is connected and no rewards are accruing on this page.</p></div><span class="pill">COMING SOON</span></div>
     <div class="staking-preview" aria-label="Preview of the staking dashboard">
       <div class="card wallet-card">
-        <div class="row"><div><small class="muted">WALLET STATUS</small><h3>Not connected in preview</h3></div><span class="pill">PREVIEW</span></div>
-        <p class="muted">Choose an NFT from your wallet, then stake it to start earning KINDO.</p>
-        <p class="muted wallet-hint">Use the site-wide wallet connection when staking goes live.</p>
+        <div class="row"><div><small class="muted">WALLET STATUS</small><h3 id="walletStatusText">Not connected</h3></div><button id="connectWallet" class="btn primary" type="button">Connect testnet wallet</button></div>
+        <p class="muted">Testnet only. Choose an NFT from your wallet, then stake it to start earning KINDO.</p>
       </div>
       <div class="reward-grid preview-stats">
-        <div class="mini"><small class="muted">NFTs staked</small><strong>0 / 555</strong></div>
-        <div class="mini"><small class="muted">Your rewards</small><strong>0 KINDO</strong></div>
-        <div class="mini"><small class="muted">Reward rate</small><strong>To be announced</strong></div>
+        <div class="mini"><small class="muted">NFTs staked</small><strong id="stakedCount">0 / 555</strong></div>
+        <div class="mini"><small class="muted">Your rewards</small><strong id="pendingValue">0 KINDO</strong></div>
+        <div class="mini"><small class="muted">Reward rate</small><strong id="rateValue">100 KINDO/day</strong></div>
       </div>
       <div class="card nft-stake-card">
         <div class="row"><div><small class="muted">STAKE AN NFT</small><h3>Choose your KINDO</h3></div><span class="status-available">Available</span></div>
         <label class="nft-number-label" for="nftNumber">NFT number</label>
-        <div class="nft-number-row"><input id="nftNumber" class="nft-number-input" type="number" min="1" max="553" placeholder="e.g. 204" disabled><button class="btn btn-details preview-button" type="button" disabled>View NFT</button></div>
-        <div class="nft-preview-tile"><div class="nft-preview-art">K</div><div><span class="pill">NFT PREVIEW</span><h4>KINDO #204</h4><p class="muted">Ready to stake at launch</p></div><button class="btn primary preview-button" type="button" disabled>Stake NFT</button></div>
+        <div class="nft-number-row"><input id="nftNumber" class="nft-number-input" type="number" min="1" max="553" placeholder="e.g. 1"><span class="muted">Enter a token ID</span></div>
+        <div class="nft-preview-tile"><div class="nft-preview-art">K</div><div><span class="pill">TESTNET NFT</span><h4>Selected KINDO NFT</h4><p class="muted">Approve and stake on Robinhood Testnet</p></div><button id="stakeButton" class="btn primary" type="button">Stake NFT</button></div>
       </div>
       <div class="card staked-card">
-        <div class="row"><div><small class="muted">YOUR STAKED NFTS</small><h3>Nothing staked yet</h3></div><span class="pill">0 ACTIVE</span></div>
+        <div class="row"><div><small class="muted">YOUR STAKED NFTS</small><h3>Use the selected NFT</h3></div><span class="pill">TESTNET</span></div>
         <div class="empty-state"><span>◎</span><p>Your staked NFTs and live KINDO earnings will appear here.</p></div>
-        <div class="reward-actions"><button class="btn dark preview-button" type="button" disabled>Claim rewards</button><button class="btn dark preview-button" type="button" disabled>Unstake</button></div>
+        <div class="reward-actions"><button id="claimButton" class="btn dark" type="button">Claim rewards</button><button id="unstakeButton" class="btn dark" type="button">Unstake</button></div>
       </div>
     </div>
-    <div class="note preview-disclaimer">Preview only — wallet connection, staking, claims and rewards are not live yet. Final rates and eligibility will be announced before launch.</div>
+    <div class="note preview-disclaimer">TESTNET ONLY — this page uses the Robinhood Chain Testnet contract. Do not send mainnet assets or treat testnet rewards as real value.</div>
   </section>
   <section class="section wrap" aria-labelledby="collection-title">
     <div class="section-head"><div><h2 id="collection-title">Meet the collection</h2><p class="muted preview-note">Artwork previews from Kindo’s journey. These are not wallet holdings or staking eligibility claims.</p></div><a class="btn dark" href="nft.html">View collection ↗</a></div>
@@ -78,4 +78,5 @@
     </div>
   </dialog>
 </body>
+<script src="staking-live.js"></script>
 </html>
