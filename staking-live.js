@@ -29,6 +29,16 @@
     setStatus(`Connected · ${account.slice(0,6)}…${account.slice(-4)}`);
     await refresh();
   }
+  async function syncAccount(accounts) {
+    if (!accounts?.length || !provider) return;
+    account = accounts[0];
+    signer = await provider.getSigner(account);
+    staking = new window.ethers.Contract(STAKING, stakingAbi, signer);
+    nft = new window.ethers.Contract(NFT, nftAbi, signer);
+    $('connectWallet').textContent = `${account.slice(0,6)}…${account.slice(-4)}`;
+    setStatus(`Connected · ${account.slice(0,6)}…${account.slice(-4)}`);
+    await refresh();
+  }
   async function refresh() {
     if (!staking) return;
     $('rateValue').textContent = `${format(ethers.formatUnits(await staking.rewardRatePerDay(),18))} KINDO/day`;
@@ -56,5 +66,10 @@
   }
   async function claim() { if (!selectedId) return setStatus('Select a staked NFT first.'); try { const tx=await staking.claim(selectedId); await tx.wait(); setStatus('Reward claimed successfully.'); await refresh(); } catch(e) { setStatus(e.shortMessage || 'Claim transaction failed.'); } }
   async function unstake() { if (!selectedId) return setStatus('Select a staked NFT first.'); try { const tx=await staking.unstake(selectedId); await tx.wait(); setStatus('NFT unstaked successfully.'); await refresh(); } catch(e) { setStatus(e.shortMessage || 'Unstake transaction failed.'); } }
-  $('connectWallet')?.addEventListener('click', connect); $('stakeButton')?.addEventListener('click', stake); $('claimButton')?.addEventListener('click', claim); $('unstakeButton')?.addEventListener('click', unstake); setInterval(() => refresh().catch(()=>{}), 15000);
+  $('connectWallet')?.addEventListener('click', connect);
+  $('stakeButton')?.addEventListener('click', stake);
+  $('claimButton')?.addEventListener('click', claim);
+  $('unstakeButton')?.addEventListener('click', unstake);
+  if (window.ethereum?.on) window.ethereum.on('accountsChanged', accounts => syncAccount(accounts).catch(e => setStatus(errorText(e))));
+  setInterval(() => refresh().catch(()=>{}), 15000);
 })();
