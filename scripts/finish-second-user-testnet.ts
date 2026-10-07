@@ -1,0 +1,16 @@
+import "dotenv/config";
+import dotenv from "dotenv";
+import { JsonRpcProvider, Wallet, Contract } from "ethers";
+dotenv.config({ path: ".env.test-users", override: false });
+const provider = new JsonRpcProvider(process.env.ROBINHOOD_TESTNET_RPC_URL ?? "https://rpc.testnet.chain.robinhood.com");
+const owner = new Wallet(process.env.DEPLOYER_PRIVATE_KEY!, provider);
+const user40 = new Wallet(process.env.WALLET_40_PRIVATE_KEY!, provider);
+const nftAddress = "0xd6b0FBF43df68d43845bDDc6661B56ab1c17163E";
+const stakingAddress = "0x9D985701Fa20Ca95174D3ccF3e862DbdfAF26125";
+const nft = new Contract(nftAddress, ["function finalizeRandomness(uint256)","function transferFrom(address,address,uint256)","function ownerOf(uint256) view returns(address)","function approve(address,uint256)"], owner);
+const staking = new Contract(stakingAddress, ["function stake(uint256)","function totalStaked() view returns(uint256)"], user40);
+const finalize = await nft.finalizeRandomness(2); await finalize.wait(); console.log(`Finalize request 2: ${finalize.hash}`);
+const transfer = await nft.transferFrom(owner.address, user40.address, 2); await transfer.wait(); console.log(`Transfer NFT 2: ${transfer.hash}`);
+const approval = await nft.connect(user40).approve(stakingAddress, 2); await approval.wait(); console.log(`Approve NFT 2: ${approval.hash}`);
+const stake = await staking.stake(2); await stake.wait(); console.log(`Wallet 40 stake: ${stake.hash}`);
+console.log(`Staked count: ${(await staking.totalStaked()).toString()}`);
