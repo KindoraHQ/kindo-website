@@ -7,17 +7,22 @@
   const nftAbi = ['function ownerOf(uint256) view returns(address)','function approve(address,uint256)'];
   const tokenAbi = ['function balanceOf(address) view returns(uint256)'];
   const $ = id => document.getElementById(id);
-  let provider, signer, account, staking, nft, token, selectedId;
+  let provider, signer, account, staking, nft, token, selectedId, activeIdsCacheAccount, activeIdsCache;
   const setStatus = text => { const el = $('walletStatusText'); if (el) el.textContent = text; };
   const errorText = e => e?.shortMessage || e?.reason || e?.info?.error?.message || e?.message || 'Transaction failed.';
   const busy = (value, label = 'Stake NFT') => { const button = $('stakeButton'); if (button) { button.disabled = value; button.textContent = value ? 'Waiting for wallet…' : label; } };
   const format = value => Number(value).toLocaleString(undefined, {maximumFractionDigits: 4});
   async function activeIdsFor(address) {
-    const staked = await staking.queryFilter(staking.filters.Staked(address), 0, 'latest');
-    const unstaked = await staking.queryFilter(staking.filters.Unstaked(address), 0, 'latest');
-    const active = new Set(staked.map(event => String(event.args.tokenId)));
-    for (const event of unstaked) active.delete(String(event.args.tokenId));
-    return [...active].map(Number);
+    if (activeIdsCacheAccount === address && activeIdsCache) return activeIdsCache;
+    const active = [];
+    for (let start = 1; start <= 555; start += 50) {
+      const ids = Array.from({length: Math.min(50, 556 - start)}, (_, index) => start + index);
+      const records = await Promise.all(ids.map(id => staking.stakes(id)));
+      records.forEach((record, index) => {
+        if (record.owner.toLowerCase() === address.toLowerCase()) active.push(ids[index]);
+      });
+    }
+    activeIdsCacheAccount = address; activeIdsCache = active; return active;
   }
   async function connect() {
     if (!window.ethereum || !window.ethers) return setStatus('Install an EVM wallet to use the testnet preview.');
@@ -49,6 +54,7 @@
     if (!accounts?.length || !provider) return;
     account = accounts[0];
     selectedId = undefined;
+    activeIdsCacheAccount = undefined; activeIdsCache = undefined;
     signer = await provider.getSigner(account);
     staking = new window.ethers.Contract(STAKING, stakingAbi, signer);
     nft = new window.ethers.Contract(NFT, nftAbi, signer);
@@ -82,6 +88,7 @@
       const approval = await nft.approve(STAKING, id); await approval.wait();
       setStatus(`Approval confirmed. Confirm staking NFT #${id} in your wallet…`);
       const tx = await staking.stake(id); await tx.wait();
+      activeIdsCacheAccount = undefined; activeIdsCache = undefined;
       setStatus(`NFT #${id} staked successfully.`); await refresh();
     } catch (e) { console.error('Stake flow failed', e); setStatus(errorText(e)); }
     finally { busy(false); }
