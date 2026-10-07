@@ -14,6 +14,12 @@
 <script defer src="navigation.js"></script>
   <link rel="stylesheet" href="nft-footer.css">
 <script src="https://cdn.jsdelivr.net/npm/ethers@6.13.5/dist/ethers.umd.min.js"></script>
+<style>
+  #claimButton { background: #1f9d68; border-color: #1f9d68; color: #fff; }
+  #claimButton:hover { background: #178253; border-color: #178253; }
+  #unstakeButton { background: #c94b5a; border-color: #c94b5a; color: #fff; }
+  #unstakeButton:hover { background: #a93644; border-color: #a93644; }
+</style>
 </head>
 <body>
 <header class="kindo-header"><a class="kindo-brand" href="index.html" aria-label="KINDO home"><img src="assets/kindo-logo.png" alt=""><span>KINDO</span></a><button class="kindo-menu-toggle" type="button" aria-expanded="false" aria-controls="kindo-navigation" aria-label="Open navigation menu">☰</button><nav id="kindo-navigation" class="kindo-navigation" aria-label="Primary navigation"><details class="kindo-nav-group"><summary>About<span aria-hidden="true">⌄</span></summary><div class="kindo-dropdown"><a href="index.html#story">Story</a><a href="index.html#why">Why KINDO</a><a href="index.html#roadmap">Roadmap</a><a href="index.html#faq">FAQ</a></div></details><details class="kindo-nav-group"><summary>Token<span aria-hidden="true">⌄</span></summary><div class="kindo-dropdown"><a href="index.html#tokenomics">Tokenomics</a><a href="index.html#transparency">Transparency</a></div></details><details class="kindo-nav-group"><summary>NFTs<span aria-hidden="true">⌄</span></summary><div class="kindo-dropdown"><a href="nft.html">NFT Collection</a><a href="staking.html" aria-current="page">NFT Staking<small>Testnet Preview</small></a></div></details><details class="kindo-nav-group"><summary>Community<span aria-hidden="true">⌄</span></summary><div class="kindo-dropdown"><a href="index.html#community">Join the Community</a><a href="community-kit.html">Community Kit</a></div></details></nav><a class="kindo-header-cta" href="index.html#how-to-buy">How to Buy</a></header>
@@ -53,7 +59,7 @@
       <div class="card staked-card">
         <div class="row"><div><small class="muted">YOUR STAKED NFTS</small><h3>Use the selected NFT</h3></div><span class="pill">TESTNET</span></div>
         <div class="empty-state"><span>◎</span><p>Your staked NFTs and live KINDO earnings will appear here.</p></div>
-        <div class="reward-actions"><button id="claimButton" class="btn dark" type="button">Claim rewards</button><button id="unstakeButton" class="btn dark" type="button">Unstake</button></div>
+        <div class="reward-actions"><button id="claimButton" class="btn" type="button">Claim rewards</button><button id="unstakeButton" class="btn" type="button">Unstake</button></div>
       </div>
     </div>
     <div class="note preview-disclaimer">TESTNET ONLY — this page uses the Robinhood Chain Testnet contract. Do not send mainnet assets or treat testnet rewards as real value.</div>
