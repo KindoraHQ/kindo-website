@@ -20,8 +20,17 @@
       try { await window.ethereum.request({method:'wallet_switchEthereumChain', params:[{chainId:'0xb626'}]}); }
       catch { return setStatus('Please switch your wallet to Robinhood Chain Testnet.'); }
     }
-    await provider.send('eth_requestAccounts', []);
-    signer = await provider.getSigner(); account = await signer.getAddress();
+    let accounts;
+    try {
+      // Re-open MetaMask's account selector so a previously-authorized account
+      // cannot silently remain selected when the user switched accounts.
+      await window.ethereum.request({method:'wallet_requestPermissions', params:[{eth_accounts:{}}]});
+      accounts = await window.ethereum.request({method:'eth_accounts'});
+    } catch {
+      accounts = await provider.send('eth_requestAccounts', []);
+    }
+    if (!accounts?.length) return setStatus('Select an account in your wallet first.');
+    signer = await provider.getSigner(accounts[0]); account = await signer.getAddress();
     staking = new window.ethers.Contract(STAKING, stakingAbi, signer);
     nft = new window.ethers.Contract(NFT, nftAbi, signer);
     token = new window.ethers.Contract(KINDO, tokenAbi, provider);
