@@ -3,7 +3,7 @@
   const STAKING = '0x9D985701Fa20Ca95174D3ccF3e862DbdfAF26125';
   const NFT = '0xd6b0FBF43df68d43845bDDc6661B56ab1c17163E';
   const KINDO = '0xD353660E2cecaD218dCFE33E002085e1f64dec5f';
-  const stakingAbi = ['function stake(uint256)','function claim(uint256)','function unstake(uint256)','function pendingReward(uint256) view returns(uint256)','function totalStaked() view returns(uint256)','function rewardRatePerDay() view returns(uint256)','function stakes(uint256) view returns(address owner,uint64 startedAt,uint256 claimed)'];
+  const stakingAbi = ['function stake(uint256)','function claim(uint256)','function unstake(uint256)','function pendingReward(uint256) view returns(uint256)','function totalStaked() view returns(uint256)','function rewardRatePerDay() view returns(uint256)','function stakes(uint256) view returns(address owner,uint64 startedAt,uint256 claimed)','event Staked(address indexed user,uint256 indexed tokenId,uint256 timestamp)','event Unstaked(address indexed user,uint256 indexed tokenId,uint256 reward)'];
   const nftAbi = ['function ownerOf(uint256) view returns(address)','function approve(address,uint256)'];
   const tokenAbi = ['function balanceOf(address) view returns(uint256)'];
   const $ = id => document.getElementById(id);
@@ -52,6 +52,13 @@
     if (!staking) return;
     $('rateValue').textContent = `${format(ethers.formatUnits(await staking.rewardRatePerDay(),18))} KINDO/day`;
     $('stakedCount').textContent = `${await staking.totalStaked()} / 555`;
+    if (account && $('yourStakedCount')) {
+      const staked = await staking.queryFilter(staking.filters.Staked(account), 0, 'latest');
+      const unstaked = await staking.queryFilter(staking.filters.Unstaked(account), 0, 'latest');
+      const active = new Set(staked.map(event => String(event.args.tokenId)));
+      for (const event of unstaked) active.delete(String(event.args.tokenId));
+      $('yourStakedCount').textContent = String(active.size);
+    }
     if (selectedId) $('pendingValue').textContent = `${format(ethers.formatUnits(await staking.pendingReward(selectedId),18))} KINDO`;
   }
   async function stake() {
